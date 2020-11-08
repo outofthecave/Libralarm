@@ -28,6 +28,11 @@ public enum NotificationType implements Parcelable {
         this.value = value;
     }
 
+    @Override
+    public String toString() {
+        return name();
+    }
+
     public static final Creator<NotificationType> CREATOR = new Creator<NotificationType>() {
         @NonNull
         @Override

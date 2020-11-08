@@ -1,10 +1,8 @@
 package com.outofthecave.libralarm.model;
 
-import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.EnumSet;
 import java.util.Objects;
 
 import androidx.annotation.NonNull;
@@ -16,93 +14,23 @@ public final class Alarm implements Parcelable {
     @NonNull
     public String name = "";
 
-    public int year = 1970;
-    public int month = 1;
-    public int day = 1;
-    public int hour = 0;
-    public int minute = 0;
+    @NonNull
+    public DateTime dateTime = new DateTime();
 
     @NonNull
-    public RecurrenceType recurrenceType = RecurrenceType.NONE;
-    /**
-     * Number of days/weeks/months/years between two occurrences. The unit is defined by
-     * {@link #recurrenceType}.
-     */
-    public int recurrenceStep = 1;
-    /** Which weekdays the alarm should trigger on. */
+    public Recurrence recurrence = new Recurrence();
+
     @NonNull
-    public EnumSet<Weekday> recurrenceWeekdays = EnumSet.noneOf(Weekday.class);
-    /**
-     * Ordinal of the weekday in the month when the alarm should trigger. For example, {@code 3} for
-     * "every third Sunday/Monday/etc. of the month". Negative numbers are allowed: {@code -1} means
-     * the last weekday of the month, {@code -2} means the second to last weekday, etc. To be used
-     * in combination with {@link #recurrenceWeekdays}.
-     */
-    public int recurrenceWeekdayOrdinal = 1;
-    /**
-     * Which day of the month to trigger the alarm on. Only used if {@link #recurrenceType} is
-     * {@link RecurrenceType#MONTHLY} or {@link RecurrenceType#YEARLY}. This is different from
-     * {@link #day} to allow for negative numbers: {@code -1} means the last day of the month,
-     * {@code -2} means the second to last day, etc.
-     */
-    public int recurrenceDay = 1;
+    public AudioVisual audioVisual = new AudioVisual();
 
-    @Nullable
-    public Uri sound = null;
-    public int soundVolume = 1;  // TODO set reasonable default volume
-    public double soundVolumeAugmentationFactor = 1d;
-
-    public long[] vibrationPattern = new long[0];  // TODO how does this work?
-
-    public int lightArgb;  // TODO what's this?
-    public int lightOnMs;
-    public int lightOffMs;
-
+    @NonNull
     public NotificationType notificationType = NotificationType.FULLSCREEN;
 
-    /**
-     * Automatically snooze the alarm after it's been trying to get the user's attention without
-     * success for this many minutes. (Getting the user's attention includes sounds, vibrations, and
-     * lights.)
-     *
-     * If multiple auto-snooze conditions are set, the condition that is met first will snooze the
-     * alarm and the other conditions will have no effect.
-     */
-    public int autoSnoozeAfterMinutes = 1;
-    /**
-     * Automatically snooze the alarm after the sound has been played this many times. {@code -1}
-     * means unlimited.
-     *
-     * If multiple auto-snooze conditions are set, the condition that is met first will snooze the
-     * alarm and the other conditions will have no effect.
-     */
-    public int autoSnoozeAfterSoundLoops = -1;
-    /**
-     * Automatically snooze the alarm after the vibration pattern has been repeated this many times.
-     * {@code -1} means unlimited.
-     *
-     * If multiple auto-snooze conditions are set, the condition that is met first will snooze the
-     * alarm and the other conditions will have no effect.
-     */
-    public int autoSnoozeAfterVibrationLoops = -1;
-    /**
-     * Automatically snooze the alarm after the light pattern has been repeated this many times.
-     * {@code -1} means unlimited.
-     *
-     * If multiple auto-snooze conditions are set, the condition that is met first will snooze the
-     * alarm and the other conditions will have no effect.
-     */
-    public int autoSnoozeAfterLightLoops = -1;
+    @NonNull
+    public AutoSnooze autoSnooze = new AutoSnooze();
 
-    /**
-     * Maximum number of times the alarm will trigger if snoozed repeatedly. This includes the first
-     * time when the alarm initially goes off before any snoozing. {@code -1} means unlimited.
-     */
-    public int maxRepetitions = 1;
-    // TODO documentation
-    public int repetitionIntervalMinutes = 1;
-    // TODO or should we allow the user to set custom repetition instances?
-    public double repetitionIntervalChangeFactor = 1d;
+    @NonNull
+    public Snooze snooze = new Snooze();
 
     @Override
     public boolean equals(@Nullable Object that) {
@@ -116,14 +44,17 @@ public final class Alarm implements Parcelable {
 
         Alarm alarm = (Alarm) that;
         return Objects.equals(name, alarm.name)
-                && day == alarm.day
-                && recurrenceType == alarm.recurrenceType
-                && Objects.equals(year, alarm.year);
+                && Objects.equals(dateTime, alarm.dateTime)
+                && Objects.equals(recurrence, alarm.recurrence)
+                && Objects.equals(audioVisual, alarm.audioVisual)
+                && Objects.equals(notificationType, alarm.notificationType)
+                && Objects.equals(autoSnooze, alarm.autoSnooze)
+                && Objects.equals(snooze, alarm.snooze);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, day, recurrenceType, year);
+        return Objects.hash(name, dateTime, recurrence, audioVisual, notificationType, autoSnooze, snooze);
     }
 
     @Override
@@ -133,16 +64,23 @@ public final class Alarm implements Parcelable {
         sb.append("name=\"");
         sb.append(name);
         sb.append("\",");
-        sb.append("day=");
-        sb.append(day);
+        sb.append("dateTime=");
+        sb.append(dateTime);
         sb.append(",");
-        sb.append("month=");
-        sb.append(recurrenceType);
-        if (year != null) {
-            sb.append(",");
-            sb.append("year=");
-            sb.append(year);
-        }
+        sb.append("recurrence=");
+        sb.append(recurrence);
+        sb.append(",");
+        sb.append("audioVisual=");
+        sb.append(audioVisual);
+        sb.append(",");
+        sb.append("notificationType=");
+        sb.append(notificationType);
+        sb.append(",");
+        sb.append("autoSnooze=");
+        sb.append(autoSnooze);
+        sb.append(",");
+        sb.append("snooze=");
+        sb.append(snooze);
         sb.append("}");
         return sb.toString();
     }
@@ -152,13 +90,13 @@ public final class Alarm implements Parcelable {
         public Alarm createFromParcel(Parcel in) {
             Alarm alarm = new Alarm();
             alarm.name = in.readString();
-            alarm.day = in.readInt();
-            alarm.recurrenceType = in.readInt();
-            boolean hasYear = in.readByte() != 0;
-            int year = in.readInt();
-            if (hasYear) {
-                alarm.year = year;
-            }
+            ClassLoader classLoader = getClass().getClassLoader();
+            alarm.dateTime = in.readParcelable(classLoader);
+            alarm.recurrence = in.readParcelable(classLoader);
+            alarm.audioVisual = in.readParcelable(classLoader);
+            alarm.notificationType = in.readParcelable(classLoader);
+            alarm.autoSnooze = in.readParcelable(classLoader);
+            alarm.snooze = in.readParcelable(classLoader);
             return alarm;
         }
 
@@ -176,11 +114,11 @@ public final class Alarm implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(name);
-        out.writeInt(day);
-        out.writeInt(recurrenceType);
-        boolean hasYear = year != null;
-        // Write a boolean (as a byte) to indicate whether the year is present.
-        out.writeByte((byte) (hasYear ? 1 : 0));
-        out.writeInt(hasYear ? year : 0);
+        out.writeParcelable(dateTime, flags);
+        out.writeParcelable(recurrence, flags);
+        out.writeParcelable(audioVisual, flags);
+        out.writeParcelable(notificationType, flags);
+        out.writeParcelable(autoSnooze, flags);
+        out.writeParcelable(snooze, flags);
     }
 }

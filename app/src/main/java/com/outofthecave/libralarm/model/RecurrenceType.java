@@ -30,6 +30,11 @@ public enum RecurrenceType implements Parcelable {
         this.value = value;
     }
 
+    @Override
+    public String toString() {
+        return name();
+    }
+
     public static final Creator<RecurrenceType> CREATOR = new Creator<RecurrenceType>() {
         @NonNull
         @Override
