@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.room.Entity;
 
-@Entity
+@Entity(primaryKeys = {"name", "dateTime"})
 public final class Alarm implements Parcelable {
     @NonNull
     public String name = "";
