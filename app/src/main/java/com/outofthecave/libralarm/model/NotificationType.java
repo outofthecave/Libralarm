@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import androidx.annotation.NonNull;
+import androidx.room.TypeConverter;
 
 public enum NotificationType implements Parcelable {
     FULLSCREEN(0),
@@ -33,16 +34,34 @@ public enum NotificationType implements Parcelable {
         return name();
     }
 
+    @NonNull
+    public static NotificationType fromValue(int value) {
+        NotificationType notificationType = NotificationType.VALUE_TO_INSTANCE.get(value);
+        if (notificationType == null) {
+            notificationType = NotificationType.FULLSCREEN;
+        }
+        return notificationType;
+    }
+
+    public static final class Converter {
+        @TypeConverter
+        public static int toInt(NotificationType notificationType) {
+            return notificationType.value;
+        }
+
+        @NonNull
+        @TypeConverter
+        public static NotificationType toNotificationType(int value) {
+            return NotificationType.fromValue(value);
+        }
+    }
+
     public static final Creator<NotificationType> CREATOR = new Creator<NotificationType>() {
         @NonNull
         @Override
         public NotificationType createFromParcel(Parcel in) {
             int value = in.readInt();
-            NotificationType notificationType = NotificationType.VALUE_TO_INSTANCE.get(value);
-            if (notificationType == null) {
-                notificationType = NotificationType.FULLSCREEN;
-            }
-            return notificationType;
+            return NotificationType.fromValue(value);
         }
 
         @Override

@@ -7,28 +7,36 @@ import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.room.Embedded;
 import androidx.room.Entity;
+import androidx.room.TypeConverters;
 
-@Entity(primaryKeys = {"name", "dateTime"})
+@Entity(primaryKeys = {"name", "dateTime_year", "dateTime_month", "dateTime_day", "dateTime_hour", "dateTime_minute"})
 public final class Alarm implements Parcelable {
     @NonNull
     public String name = "";
 
+    @Embedded(prefix = "dateTime_")
     @NonNull
     public DateTime dateTime = new DateTime();
 
+    @Embedded(prefix = "recurrence_")
     @NonNull
     public Recurrence recurrence = new Recurrence();
 
+    @Embedded(prefix = "audioVisual_")
     @NonNull
     public AudioVisual audioVisual = new AudioVisual();
 
+    @TypeConverters(NotificationType.Converter.class)
     @NonNull
     public NotificationType notificationType = NotificationType.FULLSCREEN;
 
+    @Embedded(prefix = "autoSnooze_")
     @NonNull
     public AutoSnooze autoSnooze = new AutoSnooze();
 
+    @Embedded(prefix = "snooze_")
     @NonNull
     public Snooze snooze = new Snooze();
 

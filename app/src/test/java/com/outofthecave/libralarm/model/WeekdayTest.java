@@ -8,16 +8,16 @@ import static org.junit.Assert.*;
 
 public class WeekdayTest {
     @Test
-    public void weekdaySetToInt_intToWeekdaySet() {
-        run_weekdaySetToInt_intToWeekdaySet(EnumSet.noneOf(Weekday.class));
-        run_weekdaySetToInt_intToWeekdaySet(EnumSet.allOf(Weekday.class));
-        run_weekdaySetToInt_intToWeekdaySet(EnumSet.of(Weekday.SUNDAY, Weekday.MONDAY, Weekday.FRIDAY));
-        run_weekdaySetToInt_intToWeekdaySet(EnumSet.of(Weekday.SATURDAY));
+    public void testSetConverter() {
+        runSetConverter(EnumSet.allOf(Weekday.class));
+        runSetConverter(EnumSet.noneOf(Weekday.class));
+        runSetConverter(EnumSet.of(Weekday.SUNDAY, Weekday.MONDAY, Weekday.FRIDAY));
+        runSetConverter(EnumSet.of(Weekday.SATURDAY));
     }
 
-    private void run_weekdaySetToInt_intToWeekdaySet(EnumSet<Weekday> weekdays) {
-        int i = Weekday.weekdaySetToInt(weekdays);
-        EnumSet<Weekday> newWeekdays = Weekday.intToWeekdaySet(i);
+    private void runSetConverter(EnumSet<Weekday> weekdays) {
+        int i = Weekday.SetConverter.toInt(weekdays);
+        EnumSet<Weekday> newWeekdays = Weekday.SetConverter.toWeekdaySet(i);
         assertEquals(weekdays, newWeekdays);
     }
 }

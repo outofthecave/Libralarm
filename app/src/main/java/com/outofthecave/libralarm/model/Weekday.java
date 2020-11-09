@@ -8,7 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.room.TypeConverter;
 
 public enum Weekday implements Parcelable {
     SUNDAY(0),
@@ -53,12 +55,45 @@ public enum Weekday implements Parcelable {
         return name();
     }
 
+    @Nullable
+    public static Weekday fromValue(int value) {
+        return Weekday.VALUE_TO_INSTANCE.get(value);
+    }
+
+    public static final class SetConverter {
+        @TypeConverter
+        public static int toInt(Set<Weekday> set) {
+            int result = 0;
+            for (Weekday weekday : set) {
+                result += Math.round(Math.pow(2, weekday.value));
+            }
+            return result;
+        }
+
+        @NonNull
+        @TypeConverter
+        public static EnumSet<Weekday> toWeekdaySet(int i) {
+            EnumSet<Weekday> result = EnumSet.noneOf(Weekday.class);
+            for (int value = Weekday.MAX_VALUE; value >= 0; --value) {
+                long power = Math.round(Math.pow(2, value));
+                if (power <= i) {
+                    Weekday weekday = Weekday.fromValue(value);
+                    if (weekday != null) {
+                        result.add(weekday);
+                    }
+                    i -= power;
+                }
+            }
+            return result;
+        }
+    }
+
     public static final Creator<Weekday> CREATOR = new Creator<Weekday>() {
         @Nullable
         @Override
         public Weekday createFromParcel(Parcel in) {
             int value = in.readInt();
-            return Weekday.VALUE_TO_INSTANCE.get(value);
+            return Weekday.fromValue(value);
         }
 
         @Override
@@ -75,28 +110,5 @@ public enum Weekday implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(value);
-    }
-
-    public static int weekdaySetToInt(Set<Weekday> set) {
-        int result = 0;
-        for (Weekday weekday : set) {
-            result += Math.round(Math.pow(2, weekday.value));
-        }
-        return result;
-    }
-
-    public static EnumSet<Weekday> intToWeekdaySet(int i) {
-        EnumSet<Weekday> result = EnumSet.noneOf(Weekday.class);
-        for (int value = Weekday.MAX_VALUE; value >= 0; --value) {
-            long power = Math.round(Math.pow(2, value));
-            if (power < i) {
-                Weekday weekday = Weekday.VALUE_TO_INSTANCE.get(value);
-                if (weekday != null) {
-                    result.add(weekday);
-                }
-                i -= power;
-            }
-        }
-        return result;
     }
 }

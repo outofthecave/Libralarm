@@ -7,14 +7,19 @@ import android.os.Parcelable;
 import java.util.Arrays;
 import java.util.Objects;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.room.TypeConverters;
 
 public final class AudioVisual implements Parcelable {
+    @TypeConverters(UriConverter.class)
     @Nullable
     public Uri sound = null;
     public int soundVolume = 1;  // TODO set reasonable default volume
     public double soundVolumeAugmentationFactor = 1d;
 
+    @TypeConverters(LongArrayConverter.class)
+    @NonNull
     public long[] vibrationPattern = new long[0];  // TODO how does this work?
 
     public int lightArgb;  // TODO what's this?

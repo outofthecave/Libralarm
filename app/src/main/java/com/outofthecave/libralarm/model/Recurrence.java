@@ -8,18 +8,24 @@ import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.room.TypeConverters;
 
 public final class Recurrence implements Parcelable {
+    @TypeConverters(RecurrenceType.Converter.class)
     @NonNull
     public RecurrenceType type = RecurrenceType.NONE;
+
     /**
      * Number of days/weeks/months/years between two occurrences. The unit is defined by
      * {@link #type}.
      */
     public int step = 1;
+
     /** Which weekdays the alarm should trigger on. */
+    @TypeConverters(Weekday.SetConverter.class)
     @NonNull
     public EnumSet<Weekday> weekdays = EnumSet.noneOf(Weekday.class);
+
     /**
      * Ordinal of the weekday in the month when the alarm should trigger. For example, {@code 3} for
      * "every third Sunday/Monday/etc. of the month". Negative numbers are allowed: {@code -1} means
@@ -27,6 +33,7 @@ public final class Recurrence implements Parcelable {
      * in combination with {@link #weekdays}.
      */
     public int weekdayOrdinal = 1;
+
     /**
      * Which day of the month to trigger the alarm on. Only used if {@link #type} is
      * {@link RecurrenceType#MONTHLY} or {@link RecurrenceType#YEARLY}. This is different from
@@ -86,7 +93,7 @@ public final class Recurrence implements Parcelable {
             Recurrence recurrence = new Recurrence();
             recurrence.type = in.readParcelable(getClass().getClassLoader());
             recurrence.step = in.readInt();
-            recurrence.weekdays = Weekday.intToWeekdaySet(in.readInt());
+            recurrence.weekdays = Weekday.SetConverter.toWeekdaySet(in.readInt());
             recurrence.weekdayOrdinal = in.readInt();
             recurrence.day = in.readInt();
             return recurrence;
@@ -107,7 +114,7 @@ public final class Recurrence implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeParcelable(type, flags);
         out.writeInt(step);
-        out.writeInt(Weekday.weekdaySetToInt(weekdays));
+        out.writeInt(Weekday.SetConverter.toInt(weekdays));
         out.writeInt(weekdayOrdinal);
         out.writeInt(day);
     }

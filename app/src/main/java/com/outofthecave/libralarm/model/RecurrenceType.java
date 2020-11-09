@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import androidx.annotation.NonNull;
+import androidx.room.TypeConverter;
 
 public enum RecurrenceType implements Parcelable {
     NONE(0),
@@ -35,16 +36,34 @@ public enum RecurrenceType implements Parcelable {
         return name();
     }
 
+    @NonNull
+    public static RecurrenceType fromValue(int value) {
+        RecurrenceType recurrenceType = RecurrenceType.VALUE_TO_INSTANCE.get(value);
+        if (recurrenceType == null) {
+            recurrenceType = RecurrenceType.NONE;
+        }
+        return recurrenceType;
+    }
+
+    public static final class Converter {
+        @TypeConverter
+        public static int toInt(RecurrenceType recurrenceType) {
+            return recurrenceType.value;
+        }
+
+        @NonNull
+        @TypeConverter
+        public static RecurrenceType toRecurrenceType(int value) {
+            return RecurrenceType.fromValue(value);
+        }
+    }
+
     public static final Creator<RecurrenceType> CREATOR = new Creator<RecurrenceType>() {
         @NonNull
         @Override
         public RecurrenceType createFromParcel(Parcel in) {
             int value = in.readInt();
-            RecurrenceType recurrenceType = RecurrenceType.VALUE_TO_INSTANCE.get(value);
-            if (recurrenceType == null) {
-                recurrenceType = RecurrenceType.NONE;
-            }
-            return recurrenceType;
+            return RecurrenceType.fromValue(value);
         }
 
         @Override
