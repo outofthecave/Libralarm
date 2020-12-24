@@ -61,6 +61,8 @@ public class AlarmListActivity extends AppCompatActivity {
                 startActivityForResult(intent, AddEditDeleteAlarmActivity.REQUEST_CODE);
             }
         });
+
+        AlarmNotifier.registerNotificationChannel(context);
     }
 
     @Override
@@ -106,5 +108,7 @@ public class AlarmListActivity extends AppCompatActivity {
 
     public void onAlarmListLoaded(Context context, List<Alarm> alarms) {
         recyclerViewAdapter.setAlarms(alarms);
+
+        AlarmNotificationScheduler.scheduleNextNotification(context, alarms);
     }
 }

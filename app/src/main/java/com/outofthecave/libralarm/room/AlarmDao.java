@@ -16,6 +16,9 @@ public interface AlarmDao {
     @Query("SELECT * FROM Alarm")
     LiveData<List<Alarm>> getAllLive();
 
+    @Query("SELECT * FROM Alarm")
+    List<Alarm> getAll();
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void upsert(Alarm alarm);
 

@@ -3,12 +3,14 @@ package com.outofthecave.libralarm.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Calendar;
 import java.util.Objects;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.room.Entity;
 
-public final class DateTime implements Parcelable {
+public final class DateTime implements Comparable<DateTime>, Parcelable {
     public int year = 1970;
     public int month = 1;
     public int day = 1;
@@ -90,5 +92,76 @@ public final class DateTime implements Parcelable {
         out.writeInt(day);
         out.writeInt(hour);
         out.writeInt(minute);
+    }
+
+    @Override
+    public int compareTo(@NonNull DateTime that) {
+        if (this.year < that.year) {
+            return -1;
+        } else if (this.year > that.year) {
+            return 1;
+        }
+
+        if (this.month < that.month) {
+            return -1;
+        } else if (this.month > that.month) {
+            return 1;
+        }
+
+        if (this.day < that.day) {
+            return -1;
+        } else if (this.day > that.day) {
+            return 1;
+        }
+
+        if (this.hour < that.hour) {
+            return -1;
+        } else if (this.hour > that.hour) {
+            return 1;
+        }
+
+        if (this.minute < that.minute) {
+            return -1;
+        } else if (this.minute > that.minute) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    public Calendar toCalendar() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, year);
+        calendar.set(Calendar.MONTH, CalendarUtil.getMonthForCalendar(this));
+        calendar.set(Calendar.DAY_OF_MONTH, day);
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar;
+    }
+
+    public long toEpochMillis() {
+        return toCalendar().getTimeInMillis();
+    }
+
+    public static DateTime fromCalendar(Calendar calendar) {
+        DateTime dateTime = new DateTime();
+        dateTime.year = calendar.get(Calendar.YEAR);
+        dateTime.month = CalendarUtil.getOneBasedMonth(calendar);
+        dateTime.day = calendar.get(Calendar.DAY_OF_MONTH);
+        dateTime.hour = calendar.get(Calendar.HOUR_OF_DAY);
+        dateTime.minute = calendar.get(Calendar.MINUTE);
+        return dateTime;
+    }
+
+    public static DateTime fromEpochMillis(long epochMillis) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(epochMillis);
+        return fromCalendar(calendar);
+    }
+
+    public static DateTime now() {
+        return fromCalendar(Calendar.getInstance());
     }
 }

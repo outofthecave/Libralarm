@@ -12,6 +12,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.outofthecave.libralarm.model.Alarm;
+import com.outofthecave.libralarm.model.CalendarUtil;
+
+import java.util.Calendar;
 
 public class AddEditDeleteAlarmActivity extends AppCompatActivity {
     public static final int REQUEST_CODE = 1;
@@ -65,6 +68,12 @@ public class AddEditDeleteAlarmActivity extends AppCompatActivity {
             alarmBeingEdited.dateTime.hour = timePicker.getCurrentHour();
             alarmBeingEdited.dateTime.minute = timePicker.getCurrentMinute();
         }
+
+        // TODO Remove hardcoded date
+        Calendar now = Calendar.getInstance();
+        alarmBeingEdited.dateTime.year = now.get(Calendar.YEAR);
+        alarmBeingEdited.dateTime.month = CalendarUtil.getOneBasedMonth(now);
+        alarmBeingEdited.dateTime.day = now.get(Calendar.DAY_OF_MONTH);
 
         intent.putExtra(AlarmListActivity.EXTRA_ALARM_TO_UPSERT, alarmBeingEdited);
         finishWithResult(intent);
