@@ -1,6 +1,7 @@
 package com.outofthecave.libralarm;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,6 +26,8 @@ import java.util.List;
 import needle.Needle;
 
 public class AlarmListActivity extends AppCompatActivity {
+    public static final String EXTRA_ALARM_TO_ADD = "com.outofthecave.geburtstagskalender.ALARM_TO_ADD";
+    public static final String EXTRA_ALARM_TO_REPLACE = "com.outofthecave.geburtstagskalender.ALARM_TO_REPLACE";
 
     private ActivityAlarmListBinding binding;
     private AlarmListRecyclerViewAdapter recyclerViewAdapter;
@@ -50,35 +53,16 @@ public class AlarmListActivity extends AppCompatActivity {
         this.alarmListViewModel = new ViewModelProvider(this).get(AlarmListViewModel.class);
         alarmListViewModel.getAlarms().observe(this, new Observer<List<Alarm>>() {
             @Override
-            public void onChanged(List<Alarm> birthdays) {
-                onAlarmListLoaded(context, birthdays);
+            public void onChanged(List<Alarm> alarms) {
+                onAlarmListLoaded(context, alarms);
             }
         });
 
         binding.fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "TODO Add new alarm", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
-        // TODO Remove example alarms
-        Needle.onBackgroundThread().execute(new Runnable() {
-            @Override
-            public void run() {
-                AppDatabase database = AppDatabase.getInstance(context);
-                AlarmDao alarmDao = database.alarmDao();
-                Alarm exampleAlarm1 = new Alarm();
-                exampleAlarm1.name = "Travail";
-                exampleAlarm1.dateTime.hour = 7;
-                exampleAlarm1.dateTime.minute = 30;
-                alarmDao.add(exampleAlarm1);
-                Alarm exampleAlarm2 = new Alarm();
-                exampleAlarm2.name = "Fin de semaine";
-                exampleAlarm2.dateTime.hour = 8;
-                exampleAlarm2.dateTime.minute = 30;
-                alarmDao.add(exampleAlarm2);
+                Intent intent = new Intent(context, AddEditDeleteAlarmActivity.class);
+                startActivityForResult(intent, AddEditDeleteAlarmActivity.REQUEST_CODE);
             }
         });
     }
@@ -103,6 +87,23 @@ public class AlarmListActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+
+        if (requestCode != AddEditDeleteAlarmActivity.REQUEST_CODE || resultCode != RESULT_OK) {
+            return;
+        }
+
+        final Alarm alarmToReplace = intent.getParcelableExtra(EXTRA_ALARM_TO_REPLACE);
+        final Alarm alarmToAdd = intent.getParcelableExtra(EXTRA_ALARM_TO_ADD);
+        if (alarmToReplace == null && alarmToAdd == null) {
+            return;
+        }
+
+        alarmListViewModel.replace(alarmToReplace, alarmToAdd);
     }
 
     public void onAlarmListLoaded(Context context, List<Alarm> alarms) {

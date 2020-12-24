@@ -1,6 +1,8 @@
 package com.outofthecave.libralarm.ui;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -8,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.outofthecave.libralarm.AddEditDeleteAlarmActivity;
 import com.outofthecave.libralarm.AlarmListActivity;
 import com.outofthecave.libralarm.R;
 import com.outofthecave.libralarm.model.Alarm;
@@ -57,6 +60,15 @@ public class AlarmListRecyclerViewAdapter extends RecyclerView.Adapter<AlarmList
 
         TextView textView = holder.layout.findViewById(R.id.alarmListItemTextView);
         textView.setText(text);
+
+        holder.layout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(activity, AddEditDeleteAlarmActivity.class);
+                intent.putExtra(AlarmListActivity.EXTRA_ALARM_TO_REPLACE, alarm);
+                activity.startActivityForResult(intent, AddEditDeleteAlarmActivity.REQUEST_CODE);
+            }
+        });
     }
 
     @Override
