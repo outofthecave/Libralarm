@@ -15,7 +15,7 @@ public class AddEditDeleteAlarmActivity extends AppCompatActivity {
     public static final int REQUEST_CODE = 1;
 
     @Nullable
-    private Alarm alarmToReplace = null;
+    private Alarm alarmBeingEdited = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,11 +23,11 @@ public class AddEditDeleteAlarmActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_edit_delete_alarm);
 
         Intent intent = getIntent();
-        this.alarmToReplace = intent.getParcelableExtra(AlarmListActivity.EXTRA_ALARM_TO_REPLACE);
+        this.alarmBeingEdited = intent.getParcelableExtra(AlarmListActivity.EXTRA_ALARM_TO_EDIT);
 
-        if (alarmToReplace != null) {
+        if (alarmBeingEdited != null) {
             EditText nameTextField = findViewById(R.id.nameTextField);
-            nameTextField.setText(alarmToReplace.name);
+            nameTextField.setText(alarmBeingEdited.name);
         } else {
             Button deleteButton = findViewById(R.id.deleteAlarmButton);
             deleteButton.setVisibility(View.GONE);
@@ -35,29 +35,28 @@ public class AddEditDeleteAlarmActivity extends AppCompatActivity {
     }
 
     public void onSaveAlarmButtonClick(View view) {
-        onButtonClickImpl(view, true);
+        Intent intent = new Intent(this, AlarmListActivity.class);
+
+        if (alarmBeingEdited == null) {
+            alarmBeingEdited = new Alarm();
+        }
+
+        EditText nameTextField = findViewById(R.id.nameTextField);
+        alarmBeingEdited.name = nameTextField.getText().toString().trim();
+
+        intent.putExtra(AlarmListActivity.EXTRA_ALARM_TO_UPSERT, alarmBeingEdited);
+        finishWithResult(intent);
     }
 
     public void onDeleteAlarmButtonClick(View view) {
-        onButtonClickImpl(view, false);
+        Intent intent = new Intent(this, AlarmListActivity.class);
+        if (alarmBeingEdited != null) {
+            intent.putExtra(AlarmListActivity.EXTRA_ALARM_ID_TO_DELETE, alarmBeingEdited.id);
+        }
+        finishWithResult(intent);
     }
 
-    private void onButtonClickImpl(View view, boolean doAddNewAlarm) {
-        Intent intent = new Intent(this, AlarmListActivity.class);
-
-        if (alarmToReplace != null) {
-            intent.putExtra(AlarmListActivity.EXTRA_ALARM_TO_REPLACE, alarmToReplace);
-        }
-
-        if (doAddNewAlarm) {
-            Alarm alarm = new Alarm();
-
-            EditText nameTextField = findViewById(R.id.nameTextField);
-            alarm.name = nameTextField.getText().toString().trim();
-
-            intent.putExtra(AlarmListActivity.EXTRA_ALARM_TO_ADD, alarm);
-        }
-
+    private void finishWithResult(Intent intent) {
         setResult(RESULT_OK, intent);
         finish();
     }

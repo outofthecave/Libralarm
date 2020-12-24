@@ -17,8 +17,8 @@ public interface AlarmDao {
     LiveData<List<Alarm>> getAllLive();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void add(Alarm alarm);
+    void upsert(Alarm alarm);
 
-    @Delete
-    void delete(Alarm alarm);
+    @Delete(entity = Alarm.class)
+    void deleteByKey(AlarmKey key);
 }

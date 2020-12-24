@@ -7,11 +7,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.google.android.material.snackbar.Snackbar;
 import com.outofthecave.libralarm.databinding.ActivityAlarmListBinding;
 import com.outofthecave.libralarm.model.Alarm;
-import com.outofthecave.libralarm.room.AlarmDao;
-import com.outofthecave.libralarm.room.AppDatabase;
 import com.outofthecave.libralarm.ui.AlarmListRecyclerViewAdapter;
 import com.outofthecave.libralarm.ui.AlarmListViewModel;
 
@@ -23,11 +20,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-import needle.Needle;
-
 public class AlarmListActivity extends AppCompatActivity {
-    public static final String EXTRA_ALARM_TO_ADD = "com.outofthecave.geburtstagskalender.ALARM_TO_ADD";
-    public static final String EXTRA_ALARM_TO_REPLACE = "com.outofthecave.geburtstagskalender.ALARM_TO_REPLACE";
+    public static final String EXTRA_ALARM_TO_EDIT = "com.outofthecave.libralarm.ALARM_TO_EDIT";
+    public static final String EXTRA_ALARM_TO_UPSERT = "com.outofthecave.libralarm.ALARM_TO_UPSERT";
+    public static final String EXTRA_ALARM_ID_TO_DELETE = "com.outofthecave.libralarm.ALARM_ID_TO_DELETE";
 
     private ActivityAlarmListBinding binding;
     private AlarmListRecyclerViewAdapter recyclerViewAdapter;
@@ -97,13 +93,15 @@ public class AlarmListActivity extends AppCompatActivity {
             return;
         }
 
-        final Alarm alarmToReplace = intent.getParcelableExtra(EXTRA_ALARM_TO_REPLACE);
-        final Alarm alarmToAdd = intent.getParcelableExtra(EXTRA_ALARM_TO_ADD);
-        if (alarmToReplace == null && alarmToAdd == null) {
-            return;
+        final Alarm alarmToUpsert = intent.getParcelableExtra(EXTRA_ALARM_TO_UPSERT);
+        if (alarmToUpsert != null) {
+            alarmListViewModel.upsert(alarmToUpsert);
         }
 
-        alarmListViewModel.replace(alarmToReplace, alarmToAdd);
+        if (intent.hasExtra(EXTRA_ALARM_ID_TO_DELETE)) {
+            int alarmIdToDelete = intent.getIntExtra(EXTRA_ALARM_ID_TO_DELETE, -1);
+            alarmListViewModel.deleteById(alarmIdToDelete);
+        }
     }
 
     public void onAlarmListLoaded(Context context, List<Alarm> alarms) {

@@ -3,12 +3,12 @@ package com.outofthecave.libralarm.ui;
 import android.app.Application;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
 import com.outofthecave.libralarm.model.Alarm;
 import com.outofthecave.libralarm.room.AlarmDao;
+import com.outofthecave.libralarm.room.AlarmKey;
 import com.outofthecave.libralarm.room.AppDatabase;
 
 import java.util.List;
@@ -31,42 +31,22 @@ public class AlarmListViewModel extends AndroidViewModel {
         return alarms;
     }
 
-    public void add(final Alarm alarm) {
+    public void upsert(final Alarm alarm) {
         Needle.onBackgroundThread().execute(new Runnable() {
             @Override
             public void run() {
-                alarmDao.add(alarm);
+                alarmDao.upsert(alarm);
             }
         });
     }
 
-    public void delete(final Alarm alarm) {
+    public void deleteById(int id) {
+        final AlarmKey key = new AlarmKey();
+        key.id = id;
         Needle.onBackgroundThread().execute(new Runnable() {
             @Override
             public void run() {
-                alarmDao.delete(alarm);
-            }
-        });
-    }
-
-    /**
-     * Replace one alarm with another. This is different from calling {@link #delete(Alarm)}
-     * and {@link #add(Alarm)} in that it guarantees that the deletion is executed before the
-     * addition.
-     *
-     * @param alarmToReplace The old alarm to delete.
-     * @param alarmToAdd The new alarm to add.
-     */
-    public void replace(@Nullable final Alarm alarmToReplace, @Nullable final Alarm alarmToAdd) {
-        Needle.onBackgroundThread().execute(new Runnable() {
-            @Override
-            public void run() {
-                if (alarmToReplace != null) {
-                    alarmDao.delete(alarmToReplace);
-                }
-                if (alarmToAdd != null) {
-                    alarmDao.add(alarmToAdd);
-                }
+                alarmDao.deleteByKey(key);
             }
         });
     }

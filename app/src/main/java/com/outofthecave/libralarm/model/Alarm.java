@@ -9,10 +9,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.room.Embedded;
 import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
-@Entity(primaryKeys = {"name", "dateTime_year", "dateTime_month", "dateTime_day", "dateTime_hour", "dateTime_minute"})
+@Entity
 public final class Alarm implements Parcelable {
+    @PrimaryKey(autoGenerate = true)
+    public int id;
+
     @NonNull
     public String name = "";
 
@@ -51,7 +55,8 @@ public final class Alarm implements Parcelable {
         }
 
         Alarm alarm = (Alarm) that;
-        return Objects.equals(name, alarm.name)
+        return id == alarm.id
+                && Objects.equals(name, alarm.name)
                 && Objects.equals(dateTime, alarm.dateTime)
                 && Objects.equals(recurrence, alarm.recurrence)
                 && Objects.equals(audioVisual, alarm.audioVisual)
@@ -62,13 +67,16 @@ public final class Alarm implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, dateTime, recurrence, audioVisual, notificationType, autoSnooze, snooze);
+        return Objects.hash(id, name, dateTime, recurrence, audioVisual, notificationType, autoSnooze, snooze);
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Alarm{");
+        sb.append("id=");
+        sb.append(id);
+        sb.append(",");
         sb.append("name=\"");
         sb.append(name);
         sb.append("\",");
@@ -97,6 +105,7 @@ public final class Alarm implements Parcelable {
         @Override
         public Alarm createFromParcel(Parcel in) {
             Alarm alarm = new Alarm();
+            alarm.id = in.readInt();
             alarm.name = in.readString();
             ClassLoader classLoader = getClass().getClassLoader();
             alarm.dateTime = in.readParcelable(classLoader);
@@ -121,6 +130,7 @@ public final class Alarm implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
+        out.writeInt(id);
         out.writeString(name);
         out.writeParcelable(dateTime, flags);
         out.writeParcelable(recurrence, flags);

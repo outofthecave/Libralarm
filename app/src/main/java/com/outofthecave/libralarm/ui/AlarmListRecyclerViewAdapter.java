@@ -65,7 +65,7 @@ public class AlarmListRecyclerViewAdapter extends RecyclerView.Adapter<AlarmList
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(activity, AddEditDeleteAlarmActivity.class);
-                intent.putExtra(AlarmListActivity.EXTRA_ALARM_TO_REPLACE, alarm);
+                intent.putExtra(AlarmListActivity.EXTRA_ALARM_TO_EDIT, alarm);
                 activity.startActivityForResult(intent, AddEditDeleteAlarmActivity.REQUEST_CODE);
             }
         });
