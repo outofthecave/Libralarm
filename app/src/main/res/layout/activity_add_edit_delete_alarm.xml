@@ -48,22 +48,27 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
+            <TextView
+                android:id="@+id/notificationTypeText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:labelFor="@+id/notificationTypeGroup"
+                android:text="What should be shown when the alarm triggers?" />
             <RadioGroup
                 android:id="@+id/notificationTypeGroup"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:contentDescription="Notification type options">
+                android:layout_height="wrap_content">
                 <RadioButton
                     android:id="@+id/notificationTypeFullscreen"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    android:text="Fullscreen" />
+                    android:text="Fullscreen takeover" />
                 <RadioButton
                     android:id="@+id/notificationTypeHeadsUp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="On-screen notification" />
+                    android:text="Notification on top of whatever is on the screen" />
                 <RadioButton
                     android:id="@+id/notificationTypeNotification"
                     android:layout_width="match_parent"
@@ -84,6 +89,15 @@
                     android:onClick="onSaveAlarmButtonClick"
                     android:padding="@dimen/fab_margin"
                     android:text="Save" />
+
+                <Button
+                    android:id="@+id/cancelSavingButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onCancelSavingButtonClick"
+                    android:padding="@dimen/fab_margin"
+                    android:visibility="gone"
+                    android:text="Cancel saving" />
 
                 <Button
                     android:id="@+id/deleteAlarmButton"
