@@ -48,6 +48,29 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
+            <RadioGroup
+                android:id="@+id/notificationTypeGroup"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="Notification type options">
+                <RadioButton
+                    android:id="@+id/notificationTypeFullscreen"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="Fullscreen" />
+                <RadioButton
+                    android:id="@+id/notificationTypeHeadsUp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="On-screen notification" />
+                <RadioButton
+                    android:id="@+id/notificationTypeNotification"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Plain notification" />
+            </RadioGroup>
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

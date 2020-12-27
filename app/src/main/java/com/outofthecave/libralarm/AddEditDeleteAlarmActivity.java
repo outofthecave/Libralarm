@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.TimePicker;
 
 import androidx.annotation.Nullable;
@@ -14,8 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.outofthecave.libralarm.model.Alarm;
 import com.outofthecave.libralarm.model.CalendarUtil;
-
-import java.util.Calendar;
+import com.outofthecave.libralarm.model.NotificationType;
 
 public class AddEditDeleteAlarmActivity extends AppCompatActivity {
     public static final int REQUEST_CODE = 1;
@@ -50,7 +50,26 @@ public class AddEditDeleteAlarmActivity extends AppCompatActivity {
             datePicker.updateDate(alarmBeingEdited.dateTime.year,
                     CalendarUtil.getMonthForCalendar(alarmBeingEdited.dateTime),
                     alarmBeingEdited.dateTime.day);
+
+            if (alarmBeingEdited.notificationType == NotificationType.FULLSCREEN) {
+                RadioButton notificationTypeFullscreen = findViewById(R.id.notificationTypeFullscreen);
+                if (!notificationTypeFullscreen.isChecked()) {
+                    notificationTypeFullscreen.toggle();
+                }
+            } else if (alarmBeingEdited.notificationType == NotificationType.HEADS_UP) {
+                RadioButton notificationTypeHeadsUp = findViewById(R.id.notificationTypeHeadsUp);
+                if (!notificationTypeHeadsUp.isChecked()) {
+                    notificationTypeHeadsUp.toggle();
+                }
+            } else if (alarmBeingEdited.notificationType == NotificationType.NOTIFICATION) {
+                RadioButton notificationTypeNotification = findViewById(R.id.notificationTypeNotification);
+                if (!notificationTypeNotification.isChecked()) {
+                    notificationTypeNotification.toggle();
+                }
+            }
+
         } else {
+            // We're not editing an existing alarm, but creating a new one.
             Button deleteButton = findViewById(R.id.deleteAlarmButton);
             deleteButton.setVisibility(View.GONE);
         }
@@ -81,6 +100,17 @@ public class AddEditDeleteAlarmActivity extends AppCompatActivity {
         alarmBeingEdited.dateTime.year = datePicker.getYear();
         alarmBeingEdited.dateTime.month = CalendarUtil.getOneBasedMonth(datePicker.getMonth());
         alarmBeingEdited.dateTime.day = datePicker.getDayOfMonth();
+
+        RadioButton notificationTypeFullscreen = findViewById(R.id.notificationTypeFullscreen);
+        RadioButton notificationTypeHeadsUp = findViewById(R.id.notificationTypeHeadsUp);
+        RadioButton notificationTypeNotification = findViewById(R.id.notificationTypeNotification);
+        if (notificationTypeFullscreen.isChecked()) {
+            alarmBeingEdited.notificationType = NotificationType.FULLSCREEN;
+        } else if (notificationTypeHeadsUp.isChecked()) {
+            alarmBeingEdited.notificationType = NotificationType.HEADS_UP;
+        } else if (notificationTypeNotification.isChecked()) {
+            alarmBeingEdited.notificationType = NotificationType.NOTIFICATION;
+        }
 
         intent.putExtra(AlarmListActivity.EXTRA_ALARM_TO_UPSERT, alarmBeingEdited);
         finishWithResult(intent);
