@@ -5,6 +5,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TimePicker;
 
@@ -44,6 +45,11 @@ public class AddEditDeleteAlarmActivity extends AppCompatActivity {
                 timePicker.setCurrentHour(alarmBeingEdited.dateTime.hour);
                 timePicker.setCurrentMinute(alarmBeingEdited.dateTime.minute);
             }
+
+            DatePicker datePicker = findViewById(R.id.datePicker);
+            datePicker.updateDate(alarmBeingEdited.dateTime.year,
+                    CalendarUtil.getMonthForCalendar(alarmBeingEdited.dateTime),
+                    alarmBeingEdited.dateTime.day);
         } else {
             Button deleteButton = findViewById(R.id.deleteAlarmButton);
             deleteButton.setVisibility(View.GONE);
@@ -69,11 +75,10 @@ public class AddEditDeleteAlarmActivity extends AppCompatActivity {
             alarmBeingEdited.dateTime.minute = timePicker.getCurrentMinute();
         }
 
-        // TODO Remove hardcoded date
-        Calendar now = Calendar.getInstance();
-        alarmBeingEdited.dateTime.year = now.get(Calendar.YEAR);
-        alarmBeingEdited.dateTime.month = CalendarUtil.getOneBasedMonth(now);
-        alarmBeingEdited.dateTime.day = now.get(Calendar.DAY_OF_MONTH);
+        DatePicker datePicker = findViewById(R.id.datePicker);
+        alarmBeingEdited.dateTime.year = datePicker.getYear();
+        alarmBeingEdited.dateTime.month = CalendarUtil.getOneBasedMonth(datePicker.getMonth());
+        alarmBeingEdited.dateTime.day = datePicker.getDayOfMonth();
 
         intent.putExtra(AlarmListActivity.EXTRA_ALARM_TO_UPSERT, alarmBeingEdited);
         finishWithResult(intent);

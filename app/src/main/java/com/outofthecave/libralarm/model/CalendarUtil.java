@@ -6,8 +6,12 @@ public class CalendarUtil {
     private CalendarUtil() {
     }
 
+    public static int getOneBasedMonth(int calendarMonth) {
+        return 1 + calendarMonth - Calendar.JANUARY;
+    }
+
     public static int getOneBasedMonth(Calendar calendar) {
-        return 1 + calendar.get(Calendar.MONTH) - Calendar.JANUARY;
+        return getOneBasedMonth(calendar.get(Calendar.MONTH));
     }
 
     public static int getMonthForCalendar(DateTime dateTime) {
