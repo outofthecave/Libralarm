@@ -66,6 +66,8 @@ public class AddEditDeleteAlarmActivity extends AppCompatActivity {
         EditText nameTextField = findViewById(R.id.nameTextField);
         alarmBeingEdited.name = nameTextField.getText().toString().trim();
 
+        alarmBeingEdited.enabled = true;
+
         TimePicker timePicker = findViewById(R.id.timePicker);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             alarmBeingEdited.dateTime.hour = timePicker.getHour();

@@ -1,5 +1,6 @@
 package com.outofthecave.libralarm.model;
 
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -19,6 +20,8 @@ public final class Alarm implements Parcelable {
 
     @NonNull
     public String name = "";
+
+    public boolean enabled = true;
 
     @Embedded(prefix = "dateTime_")
     @NonNull
@@ -57,6 +60,7 @@ public final class Alarm implements Parcelable {
         Alarm alarm = (Alarm) that;
         return id == alarm.id
                 && Objects.equals(name, alarm.name)
+                && enabled == alarm.enabled
                 && Objects.equals(dateTime, alarm.dateTime)
                 && Objects.equals(recurrence, alarm.recurrence)
                 && Objects.equals(audioVisual, alarm.audioVisual)
@@ -67,7 +71,7 @@ public final class Alarm implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, dateTime, recurrence, audioVisual, notificationType, autoSnooze, snooze);
+        return Objects.hash(id, name, enabled, dateTime, recurrence, audioVisual, notificationType, autoSnooze, snooze);
     }
 
     @Override
@@ -76,6 +80,9 @@ public final class Alarm implements Parcelable {
         sb.append("Alarm{");
         sb.append("id=");
         sb.append(id);
+        sb.append(",");
+        sb.append("enabled=");
+        sb.append(enabled);
         sb.append(",");
         sb.append("name=\"");
         sb.append(name);
@@ -107,6 +114,11 @@ public final class Alarm implements Parcelable {
             Alarm alarm = new Alarm();
             alarm.id = in.readInt();
             alarm.name = in.readString();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                alarm.enabled = in.readBoolean();
+            } else {
+                alarm.enabled = in.readByte() == (byte) 1;
+            }
             ClassLoader classLoader = getClass().getClassLoader();
             alarm.dateTime = in.readParcelable(classLoader);
             alarm.recurrence = in.readParcelable(classLoader);
@@ -132,6 +144,11 @@ public final class Alarm implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(id);
         out.writeString(name);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            out.writeBoolean(enabled);
+        } else {
+            out.writeByte(enabled ? (byte) 1 : (byte) 0);
+        }
         out.writeParcelable(dateTime, flags);
         out.writeParcelable(recurrence, flags);
         out.writeParcelable(audioVisual, flags);

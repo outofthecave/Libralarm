@@ -29,6 +29,10 @@ public class AlarmListActivity extends AppCompatActivity {
     private AlarmListRecyclerViewAdapter recyclerViewAdapter;
     private AlarmListViewModel alarmListViewModel;
 
+    public AlarmListViewModel getAlarmListViewModel() {
+        return alarmListViewModel;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

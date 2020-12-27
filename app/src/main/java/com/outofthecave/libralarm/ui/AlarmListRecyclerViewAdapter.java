@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -56,10 +57,20 @@ public class AlarmListRecyclerViewAdapter extends RecyclerView.Adapter<AlarmList
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         final Alarm alarm = alarms.get(position);
 
-        String text = String.format(Locale.ROOT, "%d:%d %s", alarm.dateTime.hour, alarm.dateTime.minute, alarm.name);
+        String text = String.format(Locale.ROOT, "%d:%02d %s", alarm.dateTime.hour, alarm.dateTime.minute, alarm.name);
 
         TextView textView = holder.layout.findViewById(R.id.alarmListItemTextView);
         textView.setText(text);
+
+        final SwitchCompat enableAlarmSwitch = holder.layout.findViewById(R.id.enableAlarmSwitch);
+        enableAlarmSwitch.setChecked(alarm.enabled);
+        enableAlarmSwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                alarm.enabled = enableAlarmSwitch.isChecked();
+                activity.getAlarmListViewModel().updateAlarm(alarm);
+            }
+        });
 
         holder.layout.setOnClickListener(new View.OnClickListener() {
             @Override

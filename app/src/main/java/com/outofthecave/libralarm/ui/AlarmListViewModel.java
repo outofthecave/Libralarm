@@ -50,4 +50,13 @@ public class AlarmListViewModel extends AndroidViewModel {
             }
         });
     }
+
+    public void updateAlarm(final Alarm alarm) {
+        Needle.onBackgroundThread().execute(new Runnable() {
+            @Override
+            public void run() {
+                alarmDao.updateAlarm(alarm);
+            }
+        });
+    }
 }

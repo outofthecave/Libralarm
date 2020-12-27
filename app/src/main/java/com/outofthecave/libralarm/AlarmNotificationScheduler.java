@@ -59,7 +59,8 @@ public class AlarmNotificationScheduler extends BroadcastReceiver {
             ArrayList<Alarm> upcomingAlarms = new ArrayList<>(1);
             DateTime now = DateTime.now();
             for (Alarm alarm : alarms) {
-                if (now.compareTo(alarm.dateTime) <= 0
+                if (alarm.enabled
+                        && now.compareTo(alarm.dateTime) <= 0
                         && lastTriggered.compareTo(alarm.dateTime) < 0) {
                     if (upcomingAlarms.isEmpty()) {
                         upcomingAlarms.add(alarm);
@@ -84,6 +85,7 @@ public class AlarmNotificationScheduler extends BroadcastReceiver {
             }
         }
 
+        Log.d("AlarmNotifScheduler", "Canceling any scheduled notifications");
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent notifierIntent = new Intent(context, AlarmNotifier.class);
         PendingIntent pendingNotifierIntent = getPendingNotifierIntent(context, notifierIntent);

@@ -10,6 +10,7 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
 
 @Dao
 public interface AlarmDao {
@@ -24,4 +25,7 @@ public interface AlarmDao {
 
     @Delete(entity = Alarm.class)
     void deleteByKey(AlarmKey key);
+
+    @Update
+    void updateAlarm(Alarm alarm);
 }

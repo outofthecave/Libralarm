@@ -59,7 +59,7 @@ public class AlarmNotifier extends BroadcastReceiver {
                     long nowEpochMillis = now.toEpochMillis();
                     long minDiffMillis = Long.MAX_VALUE;
                     for (Alarm alarm : allAlarms) {
-                        if (alarm.dateTime.compareTo(now) <= 0) {
+                        if (alarm.enabled && alarm.dateTime.compareTo(now) <= 0) {
                             long diffMillis = nowEpochMillis - alarm.dateTime.toEpochMillis();
                             if (diffMillis < THRESHOLD_MILLIS) {
                                 if (diffMillis < minDiffMillis) {
