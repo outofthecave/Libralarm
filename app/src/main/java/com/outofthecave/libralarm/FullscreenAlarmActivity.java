@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -24,7 +25,7 @@ public class FullscreenAlarmActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         ArrayList<Alarm> alarms = intent.getParcelableArrayListExtra(AlarmNotifier.EXTRA_ALARMS);
-        if (!alarms.isEmpty()) {
+        if (alarms != null && !alarms.isEmpty()) {
             // TODO Design actual UI
             TextView alarmName = findViewById(R.id.alarmName);
             alarmName.setText(alarms.get(0).name);
@@ -65,5 +66,10 @@ public class FullscreenAlarmActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    public void onCancelAlarmButtonClick(View view) {
+        Log.d("FullscreenAlarmActivity", "onCancelAlarmButtonClick");
+        finish();
     }
 }
