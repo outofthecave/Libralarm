@@ -1,12 +1,37 @@
 <resources>
     <string name="app_name">Libralarm</string>
     <string name="action_settings">Settings</string>
+
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
-
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+
+    <string name="notification_channel_fullscreen_name">Fullscreen alarms</string>
+    <string name="notification_channel_fullscreen_desc">Notifications for fullscreen alarms created in the app</string>
+    <string name="notification_channel_heads_up_name">Screen-top alarms</string>
+    <string name="notification_channel_heads_up_desc">Notifications shown on top of whatever is on the screen for alarms created in the app</string>
+    <string name="notification_channel_plain_name">Plain alarm notifications</string>
+    <string name="notification_channel_plain_desc">Plain notifications for alarms created in the app</string>
+
+    <string name="enable_alarm">Enable this alarm</string>
+
+    <string name="name_label">Name:</string>
+    <string name="notification_type_group_label">What should be shown when the alarm triggers?</string>
+    <string name="notification_type_fullscreen">Fullscreen takeover</string>
+    <string name="notification_type_heads_up">Notification on top of whatever is on the screen</string>
+    <string name="notification_type_notification">Plain notification</string>
+    <string name="save_alarm">Save</string>
+    <string name="cancel_saving_alarm">Cancel saving</string>
+    <string name="delete_alarm">Delete</string>
+
+    <string name="fullscreen_permission_rationale">This app needs permission to show a fullscreen notification when the alarm triggers.</string>
+    <string name="fullscreen_permission_rationale_accept">Request permission</string>
+    <string name="fullscreen_permission_rationale_reject">Cancel</string>
+
+    <string name="fullscreen_alarm_name_default">Alarm</string>
+    <string name="fullscreen_cancel_alarm">Cancel</string>
 </resources>

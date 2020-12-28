@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.outofthecave.libralarm.logic.AlarmListFilter;
+import com.outofthecave.libralarm.logic.AlarmNameFormatter;
 import com.outofthecave.libralarm.model.Alarm;
 import com.outofthecave.libralarm.room.AppDatabase;
 
@@ -94,26 +95,11 @@ public class FullscreenAlarmActivity extends AppCompatActivity {
     }
 
     private void fillTextViewWithAlarmNames(List<Alarm> alarms) {
-        String text = joinAlarmNames(alarms);
+        String text = AlarmNameFormatter.joinAlarmNamesOnNewline(alarms);
         TextView alarmName = findViewById(R.id.alarmName);
         if (!text.isEmpty()) {
             alarmName.setText(text);
         }
-    }
-
-    private String joinAlarmNames(List<Alarm> alarms) {
-        StringBuilder text = new StringBuilder();
-        boolean isFirst = true;
-        for (Alarm alarm : alarms) {
-            if (!alarm.name.isEmpty()) {
-                if (!isFirst) {
-                    text.append("\n");
-                }
-                text.append(alarm.name);
-                isFirst = false;
-            }
-        }
-        return text.toString();
     }
 
     public void onCancelAlarmButtonClick(View view) {

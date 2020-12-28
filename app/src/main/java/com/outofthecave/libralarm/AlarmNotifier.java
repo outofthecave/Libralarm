@@ -17,6 +17,7 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import com.outofthecave.libralarm.logic.AlarmListFilter;
+import com.outofthecave.libralarm.logic.AlarmNameFormatter;
 import com.outofthecave.libralarm.model.Alarm;
 import com.outofthecave.libralarm.model.DateTime;
 import com.outofthecave.libralarm.model.NotificationType;
@@ -64,7 +65,7 @@ public class AlarmNotifier extends BroadcastReceiver {
     private void showNotification(Context context, @NonNull ArrayList<Alarm> alarms) {
         Log.d("AlarmNotifier", "Supposed to show a notification for " + alarms.size() + " alarm(s).");
         if (!alarms.isEmpty()) {
-            String text = joinNames(alarms, "and", true);
+            String text = AlarmNameFormatter.joinAlarmNamesOnNewline(alarms);
 
             NotificationType notificationType = NotificationType.NOTIFICATION;
             for (Alarm alarm : alarms) {
@@ -109,7 +110,9 @@ public class AlarmNotifier extends BroadcastReceiver {
             }
 
             notificationBuilder.setSmallIcon(R.drawable.ic_baseline_alarm_24)
-                    .setContentTitle(text)
+                    .setContentText(text)
+                    .setStyle(new NotificationCompat.BigTextStyle()
+                            .bigText(text))
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                     .setCategory(NotificationCompat.CATEGORY_ALARM);
 
@@ -122,45 +125,25 @@ public class AlarmNotifier extends BroadcastReceiver {
         AlarmNotificationScheduler.scheduleNextNotification(context);
     }
 
-    @VisibleForTesting
-    static String joinNames(List<Alarm> alarms, String conjunction, boolean useOxfordComma) {
-        if (alarms.size() == 1) {
-            return alarms.get(0).name;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < alarms.size(); ++i) {
-            if (i == alarms.size() - 1) {
-                if (useOxfordComma && alarms.size() > 2) {
-                    sb.append(",");
-                }
-                sb.append(" ");
-                sb.append(conjunction);
-                sb.append(" ");
-            } else if (i != 0) {
-                sb.append(", ");
-            }
-            sb.append(alarms.get(i).name);
-        }
-        return sb.toString();
-    }
-
     public static void registerNotificationChannels(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String fullscreenName = "Fullscreen alarms";
-            String fullscreenDesc = "Notifications for fullscreen alarms created in the app";
-            NotificationChannel fullscreenChannel = new NotificationChannel(FULLSCREEN_NOTIFICATION_CHANNEL_ID, fullscreenName, NotificationManager.IMPORTANCE_HIGH);
-            fullscreenChannel.setDescription(fullscreenDesc);
+            NotificationChannel fullscreenChannel = new NotificationChannel(
+                    FULLSCREEN_NOTIFICATION_CHANNEL_ID,
+                    context.getString(R.string.notification_channel_fullscreen_name),
+                    NotificationManager.IMPORTANCE_HIGH);
+            fullscreenChannel.setDescription(context.getString(R.string.notification_channel_fullscreen_desc));
 
-            String headsUpName = "Screen-top alarms";
-            String headsUpDesc = "Notifications shown on top of whatever is on the screen for alarms created in the app";
-            NotificationChannel headsUpChannel = new NotificationChannel(HEADS_UP_NOTIFICATION_CHANNEL_ID, headsUpName, NotificationManager.IMPORTANCE_HIGH);
-            headsUpChannel.setDescription(headsUpDesc);
+            NotificationChannel headsUpChannel = new NotificationChannel(
+                    HEADS_UP_NOTIFICATION_CHANNEL_ID,
+                    context.getString(R.string.notification_channel_heads_up_name),
+                    NotificationManager.IMPORTANCE_HIGH);
+            headsUpChannel.setDescription(context.getString(R.string.notification_channel_heads_up_desc));
 
-            String plainName = "Plain alarm notifications";
-            String plainDesc = "Plain notifications for alarms created in the app";
-            NotificationChannel plainChannel = new NotificationChannel(PLAIN_NOTIFICATION_CHANNEL_ID, plainName, NotificationManager.IMPORTANCE_DEFAULT);
-            plainChannel.setDescription(plainDesc);
+            NotificationChannel plainChannel = new NotificationChannel(
+                    PLAIN_NOTIFICATION_CHANNEL_ID,
+                    context.getString(R.string.notification_channel_plain_name),
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            plainChannel.setDescription(context.getString(R.string.notification_channel_plain_desc));
 
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.createNotificationChannel(fullscreenChannel);

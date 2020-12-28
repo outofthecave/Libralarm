@@ -25,7 +25,7 @@
                     android:layout_height="wrap_content"
                     android:labelFor="@+id/nameTextField"
                     android:padding="@dimen/fab_margin"
-                    android:text="Name:" />
+                    android:text="@string/name_label" />
 
                 <EditText
                     android:id="@+id/nameTextField"
@@ -53,7 +53,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:labelFor="@+id/notificationTypeGroup"
-                android:text="What should be shown when the alarm triggers?" />
+                android:text="@string/notification_type_group_label" />
             <RadioGroup
                 android:id="@+id/notificationTypeGroup"
                 android:layout_width="match_parent"
@@ -63,17 +63,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    android:text="Fullscreen takeover" />
+                    android:text="@string/notification_type_fullscreen" />
                 <RadioButton
                     android:id="@+id/notificationTypeHeadsUp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Notification on top of whatever is on the screen" />
+                    android:text="@string/notification_type_heads_up" />
                 <RadioButton
                     android:id="@+id/notificationTypeNotification"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Plain notification" />
+                    android:text="@string/notification_type_notification" />
             </RadioGroup>
 
             <LinearLayout
@@ -88,7 +88,7 @@
                     android:layout_height="wrap_content"
                     android:onClick="onSaveAlarmButtonClick"
                     android:padding="@dimen/fab_margin"
-                    android:text="Save" />
+                    android:text="@string/save_alarm" />
 
                 <Button
                     android:id="@+id/cancelSavingButton"
@@ -97,7 +97,7 @@
                     android:onClick="onCancelSavingButtonClick"
                     android:padding="@dimen/fab_margin"
                     android:visibility="gone"
-                    android:text="Cancel saving" />
+                    android:text="@string/cancel_saving_alarm" />
 
                 <Button
                     android:id="@+id/deleteAlarmButton"
@@ -105,7 +105,7 @@
                     android:layout_height="wrap_content"
                     android:onClick="onDeleteAlarmButtonClick"
                     android:padding="@dimen/fab_margin"
-                    android:text="Delete" />
+                    android:text="@string/delete_alarm" />
 
             </LinearLayout>
 

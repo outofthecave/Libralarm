@@ -173,14 +173,14 @@ public class AddEditDeleteAlarmActivity extends AppCompatActivity {
 
     private void showRequestPermissionRationale() {
         new AlertDialog.Builder(this)
-                .setMessage("This app needs permission to show a fullscreen notification when the alarm triggers.")
-                .setPositiveButton("Request permission", new DialogInterface.OnClickListener() {
+                .setMessage(R.string.fullscreen_permission_rationale)
+                .setPositiveButton(R.string.fullscreen_permission_rationale_accept, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         requestFullscreenPermission();
                     }
                 })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.fullscreen_permission_rationale_reject, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         afterFullscreenPermissionDenied();
