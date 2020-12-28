@@ -16,6 +16,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
+import com.outofthecave.libralarm.logic.AlarmListFilter;
 import com.outofthecave.libralarm.model.Alarm;
 import com.outofthecave.libralarm.model.DateTime;
 import com.outofthecave.libralarm.model.NotificationType;
@@ -31,7 +32,6 @@ public class AlarmNotifier extends BroadcastReceiver {
     private static final String FULLSCREEN_NOTIFICATION_CHANNEL_ID = "alarm_fullscreen";
     private static final String HEADS_UP_NOTIFICATION_CHANNEL_ID = "alarm_heads_up";
     private static final String PLAIN_NOTIFICATION_CHANNEL_ID = "alarm_notification";
-    private static final long THRESHOLD_MILLIS = 2 * 60 * 1000;
 
     public static final String EXTRA_ALARMS = "com.outofthecave.libralarm.EXTRA_ALARMS";
 
@@ -54,25 +54,7 @@ public class AlarmNotifier extends BroadcastReceiver {
                 protected void thenDoUiRelatedWork(@NonNull List<Alarm> allAlarms) {
                     Log.d("AlarmNotifier", "Retrieved " + allAlarms.size() + " alarm(s).");
 
-                    ArrayList<Alarm> alarms = new ArrayList<>();
-                    DateTime now = DateTime.now();
-                    long nowEpochMillis = now.toEpochMillis();
-                    long minDiffMillis = Long.MAX_VALUE;
-                    for (Alarm alarm : allAlarms) {
-                        if (alarm.enabled && alarm.dateTime.compareTo(now) <= 0) {
-                            long diffMillis = nowEpochMillis - alarm.dateTime.toEpochMillis();
-                            if (diffMillis < THRESHOLD_MILLIS) {
-                                if (diffMillis < minDiffMillis) {
-                                    alarms = new ArrayList<>();
-                                    alarms.add(alarm);
-                                    minDiffMillis = diffMillis;
-                                } else if (diffMillis == minDiffMillis) {
-                                    alarms.add(alarm);
-                                }
-                            }
-                        }
-                    }
-
+                    ArrayList<Alarm> alarms = AlarmListFilter.getAlarmsToNotifyAboutNow(allAlarms);
                     showNotification(context, alarms);
                 }
             });
@@ -117,7 +99,7 @@ public class AlarmNotifier extends BroadcastReceiver {
                 Intent fullscreenIntent = new Intent(context, FullscreenAlarmActivity.class);
                 fullscreenIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                fullscreenIntent.putParcelableArrayListExtra(EXTRA_ALARMS, alarms);
+                fullscreenIntent.putParcelableArrayListExtra(FullscreenAlarmActivity.EXTRA_ALARMS_FOR_FULLSCREEN, alarms);
                 PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, fullscreenIntent, 0);
                 notificationBuilder.setFullScreenIntent(pendingIntent, true);
             } else {

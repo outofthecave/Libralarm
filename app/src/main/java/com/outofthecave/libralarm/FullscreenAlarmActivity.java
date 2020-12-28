@@ -10,13 +10,22 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.outofthecave.libralarm.logic.AlarmListFilter;
 import com.outofthecave.libralarm.model.Alarm;
+import com.outofthecave.libralarm.room.AppDatabase;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import needle.Needle;
+import needle.UiRelatedTask;
 
 public class FullscreenAlarmActivity extends AppCompatActivity {
+    public static final String EXTRA_ALARMS_FOR_FULLSCREEN = "com.outofthecave.libralarm.ALARMS_FOR_FULLSCREEN";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,11 +33,27 @@ public class FullscreenAlarmActivity extends AppCompatActivity {
         setContentView(R.layout.activity_fullscreen_alarm);
 
         Intent intent = getIntent();
-        ArrayList<Alarm> alarms = intent.getParcelableArrayListExtra(AlarmNotifier.EXTRA_ALARMS);
-        if (alarms != null && !alarms.isEmpty()) {
-            // TODO Design actual UI
-            TextView alarmName = findViewById(R.id.alarmName);
-            alarmName.setText(alarms.get(0).name);
+        ArrayList<Alarm> alarms = intent.getParcelableArrayListExtra(EXTRA_ALARMS_FOR_FULLSCREEN);
+        Log.d("FullscreenAlarmActivity", String.format("Received %s alarm(s).", (alarms == null ? null : alarms.size())));
+
+        if (alarms != null) {
+            fillTextViewWithAlarmNames(alarms);
+        } else {
+            final AppDatabase database = AppDatabase.getInstance(this);
+            Needle.onBackgroundThread().execute(new UiRelatedTask<List<Alarm>>() {
+                @Override
+                protected List<Alarm> doWork() {
+                    return database.alarmDao().getAll();
+                }
+
+                @Override
+                protected void thenDoUiRelatedWork(@NonNull List<Alarm> allAlarms) {
+                    Log.d("FullscreenAlarmActivity", String.format("Retrieved %s alarm(s).", allAlarms.size()));
+
+                    ArrayList<Alarm> alarms = AlarmListFilter.getAlarmsToNotifyAboutNow(allAlarms);
+                    fillTextViewWithAlarmNames(alarms);
+                }
+            });
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
@@ -66,6 +91,29 @@ public class FullscreenAlarmActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void fillTextViewWithAlarmNames(List<Alarm> alarms) {
+        String text = joinAlarmNames(alarms);
+        TextView alarmName = findViewById(R.id.alarmName);
+        if (!text.isEmpty()) {
+            alarmName.setText(text);
+        }
+    }
+
+    private String joinAlarmNames(List<Alarm> alarms) {
+        StringBuilder text = new StringBuilder();
+        boolean isFirst = true;
+        for (Alarm alarm : alarms) {
+            if (!alarm.name.isEmpty()) {
+                if (!isFirst) {
+                    text.append("\n");
+                }
+                text.append(alarm.name);
+                isFirst = false;
+            }
+        }
+        return text.toString();
     }
 
     public void onCancelAlarmButtonClick(View view) {
