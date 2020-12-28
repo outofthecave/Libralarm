@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.outofthecave.libralarm">
 
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
@@ -12,23 +13,32 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Libralarm">
+
         <activity
             android:name=".AlarmListActivity"
             android:label="@string/app_name"
             android:theme="@style/Theme.Libralarm.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".AddEditDeleteAlarmActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".FullscreenAlarmActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"/>
+
         <receiver
             android:name=".AlarmNotifier"
             android:exported="false" />
+
         <!-- Disabled by default and enabled by the code on first app launch. -->
         <receiver
             android:name=".AlarmNotificationScheduler"
@@ -38,6 +48,7 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
     </application>
 
 </manifest>

@@ -33,7 +33,7 @@ import com.outofthecave.libralarm.model.NotificationType;
 public class AddEditDeleteAlarmActivity extends AppCompatActivity {
     public static final int REQUEST_CODE = 1;
 
-    private static final String FULLSCREEN_PERMISSION;
+    public static final String FULLSCREEN_PERMISSION;
     static {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
             FULLSCREEN_PERMISSION = Manifest.permission.USE_FULL_SCREEN_INTENT;

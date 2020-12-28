@@ -29,6 +29,10 @@ public enum NotificationType implements Parcelable {
         this.value = value;
     }
 
+    public int getValue() {
+        return value;
+    }
+
     @Override
     public String toString() {
         return name();

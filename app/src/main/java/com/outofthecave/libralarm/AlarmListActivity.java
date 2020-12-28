@@ -66,7 +66,7 @@ public class AlarmListActivity extends AppCompatActivity {
             }
         });
 
-        AlarmNotifier.registerNotificationChannel(context);
+        AlarmNotifier.registerNotificationChannels(context);
     }
 
     @Override
