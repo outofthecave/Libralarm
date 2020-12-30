@@ -33,5 +33,6 @@
     <string name="fullscreen_permission_rationale_reject">Cancel</string>
 
     <string name="fullscreen_alarm_name_default">Alarm</string>
+    <string name="fullscreen_snooze_alarm">Snooze</string>
     <string name="fullscreen_cancel_alarm">Cancel</string>
 </resources>

@@ -11,11 +11,13 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.outofthecave.libralarm.logic.AlarmListFilter;
 import com.outofthecave.libralarm.logic.AlarmNameFormatter;
 import com.outofthecave.libralarm.model.Alarm;
+import com.outofthecave.libralarm.model.SnoozedAlarm;
 import com.outofthecave.libralarm.room.AppDatabase;
 
 import java.util.ArrayList;
@@ -26,6 +28,11 @@ import needle.UiRelatedTask;
 
 public class FullscreenAlarmActivity extends AppCompatActivity {
     public static final String EXTRA_ALARMS_FOR_FULLSCREEN = "com.outofthecave.libralarm.ALARMS_FOR_FULLSCREEN";
+
+    @Nullable
+    private ArrayList<Alarm> alarms = null;
+    @Nullable
+    private ArrayList<SnoozedAlarm> snoozedAlarms = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +45,7 @@ public class FullscreenAlarmActivity extends AppCompatActivity {
         Log.d("FullscreenAlarmActivity", String.format("Received %s alarm(s).", (alarms == null ? null : alarms.size())));
 
         if (alarms != null) {
-            fillTextViewWithAlarmNames(alarms);
+            onAlarmListReceived(alarms);
         } else {
             final AppDatabase database = AppDatabase.getInstance(this);
             Needle.onBackgroundThread().execute(new UiRelatedTask<List<Alarm>>() {
@@ -52,7 +59,7 @@ public class FullscreenAlarmActivity extends AppCompatActivity {
                     Log.d("FullscreenAlarmActivity", String.format("Retrieved %s alarm(s).", allAlarms.size()));
 
                     ArrayList<Alarm> alarms = AlarmListFilter.getAlarmsToNotifyAboutNow(allAlarms);
-                    fillTextViewWithAlarmNames(alarms);
+                    onAlarmListReceived(alarms);
                 }
             });
         }
@@ -94,12 +101,39 @@ public class FullscreenAlarmActivity extends AppCompatActivity {
         }
     }
 
-    private void fillTextViewWithAlarmNames(List<Alarm> alarms) {
+    private void onAlarmListReceived(ArrayList<Alarm> alarms) {
+        this.alarms = alarms;
+        this.snoozedAlarms = new ArrayList<>(alarms.size());
+        for (Alarm alarm : alarms) {
+            SnoozedAlarm snoozedAlarm = new SnoozedAlarm(alarm.id);
+            snoozedAlarms.add(snoozedAlarm);
+        }
+
         String text = AlarmNameFormatter.joinAlarmNamesOnNewline(alarms);
         TextView alarmName = findViewById(R.id.alarmName);
         if (!text.isEmpty()) {
             alarmName.setText(text);
         }
+    }
+
+    public void onSnoozeAlarmButtonClick(View view) {
+        Log.d("FullscreenAlarmActivity", "onSnoozeAlarmButtonClick");
+
+        if (snoozedAlarms != null) {
+            for (SnoozedAlarm snoozedAlarm : snoozedAlarms) {
+                snoozedAlarm.snoozeCount += 1;
+            }
+
+            final AppDatabase database = AppDatabase.getInstance(this);
+            Needle.onBackgroundThread().execute(new Runnable() {
+                @Override
+                public void run() {
+                    database.snoozedAlarmDao().updateSnoozedAlarms(snoozedAlarms);
+                }
+            });
+        }
+
+        finish();
     }
 
     public void onCancelAlarmButtonClick(View view) {

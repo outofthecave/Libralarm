@@ -20,6 +20,14 @@
             android:text="@string/fullscreen_alarm_name_default"/>
 
         <Button
+            android:id="@+id/snoozeAlarmButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onSnoozeAlarmButtonClick"
+            android:padding="@dimen/fab_margin"
+            android:text="@string/fullscreen_snooze_alarm"/>
+
+        <Button
             android:id="@+id/cancelAlarmButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

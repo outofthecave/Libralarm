@@ -1,5 +1,6 @@
 package com.outofthecave.libralarm.logic;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.outofthecave.libralarm.model.Alarm;
@@ -41,6 +42,19 @@ public class AlarmListFilter {
         }
 
         return upcomingAlarms;
+    }
+
+    @Nullable
+    public static DateTime getUpcomingNotificationDateTime(Alarm alarm, DateTime referenceDateTime) {
+        if (!alarm.enabled) {
+            return null;
+        }
+
+        if (referenceDateTime.compareTo(alarm.dateTime) <= 0) {
+            return alarm.dateTime;
+        }
+
+        return null;
     }
 
     public static ArrayList<Alarm> getAlarmsToNotifyAboutNow(List<Alarm> allAlarms) {

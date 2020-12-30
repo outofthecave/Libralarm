@@ -2,13 +2,14 @@ package com.outofthecave.libralarm.room;
 
 import android.content.Context;
 
-import com.outofthecave.libralarm.model.Alarm;
-
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {Alarm.class}, version = 1)
+import com.outofthecave.libralarm.model.Alarm;
+import com.outofthecave.libralarm.model.SnoozedAlarm;
+
+@Database(entities = {Alarm.class, SnoozedAlarm.class}, version = 1)
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase INSTANCE;
 
@@ -25,4 +26,6 @@ public abstract class AppDatabase extends RoomDatabase {
     }
 
     public abstract AlarmDao alarmDao();
+
+    public abstract SnoozedAlarmDao snoozedAlarmDao();
 }
