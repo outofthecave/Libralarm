@@ -11,6 +11,7 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.outofthecave.libralarm.logic.AlarmListFilter;
 import com.outofthecave.libralarm.model.Alarm;
 import com.outofthecave.libralarm.model.DateTime;
 import com.outofthecave.libralarm.room.AppDatabase;
@@ -56,25 +57,7 @@ public class AlarmNotificationScheduler extends BroadcastReceiver {
             // Android only allows us to set one trigger for the AlarmNotifier, so we only schedule
             // a notification for the closest upcoming alarms (in case there are multiple alarms at
             // the same time).
-            ArrayList<Alarm> upcomingAlarms = new ArrayList<>(1);
-            DateTime now = DateTime.now();
-            for (Alarm alarm : alarms) {
-                if (alarm.enabled
-                        && now.compareTo(alarm.dateTime) <= 0
-                        && lastTriggered.compareTo(alarm.dateTime) < 0) {
-                    if (upcomingAlarms.isEmpty()) {
-                        upcomingAlarms.add(alarm);
-                    } else {
-                        int cmp = alarm.dateTime.compareTo(upcomingAlarms.get(0).dateTime);
-                        if (cmp < 0) {
-                            upcomingAlarms = new ArrayList<>(1);
-                            upcomingAlarms.add(alarm);
-                        } else if (cmp == 0) {
-                            upcomingAlarms.add(alarm);
-                        }
-                    }
-                }
-            }
+            ArrayList<Alarm> upcomingAlarms = AlarmListFilter.getAlarmsComingUpNow(alarms, lastTriggered);
 
             if (!upcomingAlarms.isEmpty()) {
                 long triggerTimestamp = upcomingAlarms.get(0).dateTime.toEpochMillis();
