@@ -14,10 +14,12 @@ import androidx.annotation.Nullable;
 import com.outofthecave.libralarm.logic.AlarmListFilter;
 import com.outofthecave.libralarm.model.Alarm;
 import com.outofthecave.libralarm.model.DateTime;
+import com.outofthecave.libralarm.model.SnoozedAlarm;
 import com.outofthecave.libralarm.room.AppDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import needle.Needle;
 import needle.UiRelatedTask;
@@ -47,17 +49,17 @@ public class AlarmNotificationScheduler extends BroadcastReceiver {
 
             @Override
             protected void thenDoUiRelatedWork(List<Alarm> alarms) {
-                scheduleNextNotification(context, alarms);
+                scheduleNextNotification(context, alarms, idToSnoozedAlarm);
             }
         });
     }
 
-    public static void scheduleNextNotification(Context context, List<Alarm> alarms) {
+    public static void scheduleNextNotification(Context context, List<Alarm> alarms, Map<Integer, SnoozedAlarm> idToSnoozedAlarm) {
         if (!alarms.isEmpty()) {
             // Android only allows us to set one trigger for the AlarmNotifier, so we only schedule
             // a notification for the closest upcoming alarms (in case there are multiple alarms at
             // the same time).
-            ArrayList<Alarm> upcomingAlarms = AlarmListFilter.getAlarmsComingUpNow(alarms, lastTriggered);
+            ArrayList<Alarm> upcomingAlarms = AlarmListFilter.getAlarmsComingUpNow(alarms, idToSnoozedAlarm, lastTriggered);
 
             if (!upcomingAlarms.isEmpty()) {
                 long triggerTimestamp = upcomingAlarms.get(0).dateTime.toEpochMillis();
