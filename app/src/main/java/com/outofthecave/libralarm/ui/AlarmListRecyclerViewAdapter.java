@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -64,10 +65,10 @@ public class AlarmListRecyclerViewAdapter extends RecyclerView.Adapter<AlarmList
 
         final SwitchCompat enableAlarmSwitch = holder.layout.findViewById(R.id.enableAlarmSwitch);
         enableAlarmSwitch.setChecked(alarm.enabled);
-        enableAlarmSwitch.setOnClickListener(new View.OnClickListener() {
+        enableAlarmSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View view) {
-                alarm.enabled = enableAlarmSwitch.isChecked();
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                alarm.enabled = isChecked;
                 activity.getAlarmListViewModel().updateAlarm(alarm);
             }
         });
