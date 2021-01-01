@@ -1,6 +1,7 @@
 package com.outofthecave.libralarm.logic;
 
 import com.outofthecave.libralarm.model.Alarm;
+import com.outofthecave.libralarm.model.AlarmNotification;
 import com.outofthecave.libralarm.model.DateTime;
 import com.outofthecave.libralarm.model.SnoozedAlarm;
 import com.outofthecave.libralarm.model.Weekday;
@@ -49,10 +50,13 @@ public class AlarmListFilterTest {
         referenceDateTime.hour = 7;
         referenceDateTime.minute = 45;
 
-        List<Alarm> expectedUpcomingAlarms = Arrays.asList(alarm800Foo, alarm800Bar);
+        AlarmNotification expectedNotification = new AlarmNotification();
+        expectedNotification.alarms = toAlarmArrayList(alarm800Foo, alarm800Bar);
+        expectedNotification.dateTime.hour = 8;
+        expectedNotification.dateTime.minute = 0;
 
-        List<Alarm> upcomingAlarms = AlarmListFilter.getAlarmsComingUpAtDateTime(allAlarms, idToSnoozedAlarm, lastTriggered, referenceDateTime);
-        assertEquals(expectedUpcomingAlarms, upcomingAlarms);
+        AlarmNotification notification = AlarmListFilter.getAlarmsComingUpAtDateTime(allAlarms, idToSnoozedAlarm, lastTriggered, referenceDateTime);
+        assertEquals(expectedNotification, notification);
     }
 
     @Test
@@ -87,10 +91,13 @@ public class AlarmListFilterTest {
         referenceDateTime.hour = 8;
         referenceDateTime.minute = 0;
 
-        List<Alarm> expectedUpcomingAlarms = Arrays.asList(alarm830Foo);
+        AlarmNotification expectedNotification = new AlarmNotification();
+        expectedNotification.alarms = toAlarmArrayList(alarm830Foo);
+        expectedNotification.dateTime.hour = 8;
+        expectedNotification.dateTime.minute = 30;
 
-        List<Alarm> upcomingAlarms = AlarmListFilter.getAlarmsComingUpAtDateTime(allAlarms, idToSnoozedAlarm, lastTriggered, referenceDateTime);
-        assertEquals(expectedUpcomingAlarms, upcomingAlarms);
+        AlarmNotification notification = AlarmListFilter.getAlarmsComingUpAtDateTime(allAlarms, idToSnoozedAlarm, lastTriggered, referenceDateTime);
+        assertEquals(expectedNotification, notification);
     }
 
     @Test
@@ -126,10 +133,54 @@ public class AlarmListFilterTest {
         referenceDateTime.hour = 8;
         referenceDateTime.minute = 0;
 
-        List<Alarm> expectedUpcomingAlarms = Arrays.asList(alarm800Bar);
+        AlarmNotification expectedNotification = new AlarmNotification();
+        expectedNotification.alarms = toAlarmArrayList(alarm800Bar);
+        expectedNotification.dateTime.hour = 8;
+        expectedNotification.dateTime.minute = 0;
 
-        List<Alarm> upcomingAlarms = AlarmListFilter.getAlarmsComingUpAtDateTime(allAlarms, idToSnoozedAlarm, lastTriggered, referenceDateTime);
-        assertEquals(expectedUpcomingAlarms, upcomingAlarms);
+        AlarmNotification notification = AlarmListFilter.getAlarmsComingUpAtDateTime(allAlarms, idToSnoozedAlarm, lastTriggered, referenceDateTime);
+        assertEquals(expectedNotification, notification);
+    }
+
+    @Test
+    public void testGetAlarmsComingUpSnoozedAlarm() {
+        Alarm alarm800Foo = new Alarm();
+        alarm800Foo.id = 1;
+        alarm800Foo.name = "Foo";
+        alarm800Foo.dateTime.hour = 8;
+        alarm800Foo.dateTime.minute = 0;
+        alarm800Foo.snooze.maximum = -1;
+        alarm800Foo.snooze.intervalMinutes = 5;
+
+        Alarm alarm830Foo = new Alarm();
+        alarm830Foo.id = 2;
+        alarm830Foo.name = "Foo";
+        alarm830Foo.dateTime.hour = 8;
+        alarm830Foo.dateTime.minute = 30;
+
+        List<Alarm> allAlarms = Arrays.asList(alarm800Foo, alarm830Foo);
+
+        SnoozedAlarm snoozedAlarm800Foo = new SnoozedAlarm(alarm800Foo.id);
+        snoozedAlarm800Foo.snoozeCount = 1;
+
+        Map<Integer, SnoozedAlarm> idToSnoozedAlarm = new HashMap<>();
+        idToSnoozedAlarm.put(snoozedAlarm800Foo.id, snoozedAlarm800Foo);
+
+        DateTime lastTriggered = new DateTime();
+        lastTriggered.hour = 8;
+        lastTriggered.minute = 0;
+
+        DateTime referenceDateTime = new DateTime();
+        referenceDateTime.hour = 8;
+        referenceDateTime.minute = 4;
+
+        AlarmNotification expectedNotification = new AlarmNotification();
+        expectedNotification.alarms = toAlarmArrayList(alarm800Foo);
+        expectedNotification.dateTime.hour = 8;
+        expectedNotification.dateTime.minute = 5;
+
+        AlarmNotification notification = AlarmListFilter.getAlarmsComingUpAtDateTime(allAlarms, idToSnoozedAlarm, lastTriggered, referenceDateTime);
+        assertEquals(expectedNotification, notification);
     }
 
     @Test
@@ -254,13 +305,15 @@ public class AlarmListFilterTest {
 
         List<Alarm> allAlarms = Arrays.asList(alarm800Foo, alarm830Foo, alarm800Bar);
 
+        Map<Integer, SnoozedAlarm> idToSnoozedAlarm = new HashMap<>();
+
         DateTime referenceDateTime = new DateTime();
         referenceDateTime.hour = 8;
         referenceDateTime.minute = 0;
 
         List<Alarm> expectedAlarms = Arrays.asList(alarm800Foo, alarm800Bar);
 
-        List<Alarm> alarms = AlarmListFilter.getAlarmsToNotifyAboutAtDateTime(allAlarms, referenceDateTime);
+        List<Alarm> alarms = AlarmListFilter.getAlarmsToNotifyAboutAtDateTime(allAlarms, idToSnoozedAlarm, referenceDateTime);
         assertEquals(expectedAlarms, alarms);
     }
 
@@ -283,13 +336,15 @@ public class AlarmListFilterTest {
 
         List<Alarm> allAlarms = Arrays.asList(alarm800, alarm759, alarm802);
 
+        Map<Integer, SnoozedAlarm> idToSnoozedAlarm = new HashMap<>();
+
         DateTime referenceDateTime = new DateTime();
         referenceDateTime.hour = 8;
         referenceDateTime.minute = 1;
 
         List<Alarm> expectedAlarms = Arrays.asList(alarm800);
 
-        List<Alarm> alarms = AlarmListFilter.getAlarmsToNotifyAboutAtDateTime(allAlarms, referenceDateTime);
+        List<Alarm> alarms = AlarmListFilter.getAlarmsToNotifyAboutAtDateTime(allAlarms, idToSnoozedAlarm, referenceDateTime);
         assertEquals(expectedAlarms, alarms);
     }
 
@@ -316,13 +371,22 @@ public class AlarmListFilterTest {
 
         List<Alarm> allAlarms = Arrays.asList(alarm800Foo, alarm830Foo, alarm800Bar);
 
+        Map<Integer, SnoozedAlarm> idToSnoozedAlarm = new HashMap<>();
+
         DateTime referenceDateTime = new DateTime();
         referenceDateTime.hour = 8;
         referenceDateTime.minute = 0;
 
         List<Alarm> expectedAlarms = Arrays.asList(alarm800Bar);
 
-        List<Alarm> alarms = AlarmListFilter.getAlarmsToNotifyAboutAtDateTime(allAlarms, referenceDateTime);
+        List<Alarm> alarms = AlarmListFilter.getAlarmsToNotifyAboutAtDateTime(allAlarms, idToSnoozedAlarm, referenceDateTime);
         assertEquals(expectedAlarms, alarms);
+    }
+
+    // TODO Test for getAlarmsToNotifyAboutIgnoreDisabledAlarms with SnoozedAlarm's
+    // TODO Tests for isSnoozingPossibleForAny and isSnoozingPossible
+
+    private static ArrayList<Alarm> toAlarmArrayList(Alarm... alarms) {
+        return new ArrayList<>(Arrays.asList(alarms));
     }
 }

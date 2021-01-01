@@ -13,8 +13,10 @@ import androidx.annotation.Nullable;
 
 import com.outofthecave.libralarm.logic.AlarmListFilter;
 import com.outofthecave.libralarm.model.Alarm;
+import com.outofthecave.libralarm.model.AlarmNotification;
 import com.outofthecave.libralarm.model.DateTime;
 import com.outofthecave.libralarm.model.SnoozedAlarm;
+import com.outofthecave.libralarm.room.AlarmData;
 import com.outofthecave.libralarm.room.AppDatabase;
 
 import java.util.ArrayList;
@@ -25,7 +27,9 @@ import needle.Needle;
 import needle.UiRelatedTask;
 
 public class AlarmNotificationScheduler extends BroadcastReceiver {
-    /** The time at which the last notification was shown to the user. */
+    /**
+     * The time at which the last notification was shown to the user.
+     */
     private static DateTime lastTriggered = new DateTime();
 
     public static void setLastTriggered(DateTime lastTriggered) {
@@ -41,15 +45,19 @@ public class AlarmNotificationScheduler extends BroadcastReceiver {
 
     public static void scheduleNextNotification(final Context context) {
         final AppDatabase database = AppDatabase.getInstance(context);
-        Needle.onBackgroundThread().execute(new UiRelatedTask<List<Alarm>>() {
+        Needle.onBackgroundThread().execute(new UiRelatedTask<AlarmData>() {
             @Override
-            protected List<Alarm> doWork() {
-                return database.alarmDao().getAll();
+            protected AlarmData doWork() {
+                AlarmData alarmData = new AlarmData();
+                alarmData.alarms = database.alarmDao().getAll();
+                alarmData.snoozedAlarms = database.snoozedAlarmDao().getAll();
+                return alarmData;
             }
 
             @Override
-            protected void thenDoUiRelatedWork(List<Alarm> alarms) {
-                scheduleNextNotification(context, alarms, idToSnoozedAlarm);
+            protected void thenDoUiRelatedWork(AlarmData alarmData) {
+                Map<Integer, SnoozedAlarm> idToSnoozedAlarm = AlarmListFilter.toSnoozedAlarmMap(alarmData.snoozedAlarms);
+                scheduleNextNotification(context, alarmData.alarms, idToSnoozedAlarm);
             }
         });
     }
@@ -59,12 +67,11 @@ public class AlarmNotificationScheduler extends BroadcastReceiver {
             // Android only allows us to set one trigger for the AlarmNotifier, so we only schedule
             // a notification for the closest upcoming alarms (in case there are multiple alarms at
             // the same time).
-            ArrayList<Alarm> upcomingAlarms = AlarmListFilter.getAlarmsComingUpNow(alarms, idToSnoozedAlarm, lastTriggered);
+            AlarmNotification notification = AlarmListFilter.getAlarmsComingUpNow(alarms, idToSnoozedAlarm, lastTriggered);
 
-            if (!upcomingAlarms.isEmpty()) {
-                long triggerTimestamp = upcomingAlarms.get(0).dateTime.toEpochMillis();
-                scheduleNotification(context, triggerTimestamp, upcomingAlarms);
-
+            if (!notification.alarms.isEmpty()) {
+                long triggerTimestamp = notification.dateTime.toEpochMillis();
+                scheduleNotification(context, triggerTimestamp, notification.alarms);
                 setAutoSchedulingOnReboot(context, true);
                 return;
             }
@@ -104,8 +111,8 @@ public class AlarmNotificationScheduler extends BroadcastReceiver {
     /**
      * Schedule a notification for a specific time.
      *
-     * @param context The current context.
-     * @param triggerTimestamp When to trigger the notification, in milliseconds since the Unix Epoch.
+     * @param context             The current context.
+     * @param triggerTimestamp    When to trigger the notification, in milliseconds since the Unix Epoch.
      * @param alarmsToNotifyAbout The alarms to mention in the notification.
      */
     public static void scheduleNotification(Context context, long triggerTimestamp, @Nullable ArrayList<Alarm> alarmsToNotifyAbout) {

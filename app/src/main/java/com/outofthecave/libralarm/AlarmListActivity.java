@@ -7,16 +7,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.outofthecave.libralarm.databinding.ActivityAlarmListBinding;
-import com.outofthecave.libralarm.model.Alarm;
-import com.outofthecave.libralarm.ui.AlarmListRecyclerViewAdapter;
-import com.outofthecave.libralarm.ui.AlarmListViewModel;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.outofthecave.libralarm.databinding.ActivityAlarmListBinding;
+import com.outofthecave.libralarm.model.Alarm;
+import com.outofthecave.libralarm.ui.AlarmListRecyclerViewAdapter;
+import com.outofthecave.libralarm.ui.AlarmListViewModel;
 
 import java.util.List;
 
@@ -110,9 +110,9 @@ public class AlarmListActivity extends AppCompatActivity {
         }
     }
 
-    public void onAlarmListLoaded(Context context, List<Alarm> alarms) {
+    private void onAlarmListLoaded(Context context, List<Alarm> alarms) {
         recyclerViewAdapter.setAlarms(alarms);
 
-        AlarmNotificationScheduler.scheduleNextNotification(context, alarms);
+        AlarmNotificationScheduler.scheduleNextNotification(context);
     }
 }

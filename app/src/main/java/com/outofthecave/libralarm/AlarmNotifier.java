@@ -21,10 +21,13 @@ import com.outofthecave.libralarm.logic.AlarmNameFormatter;
 import com.outofthecave.libralarm.model.Alarm;
 import com.outofthecave.libralarm.model.DateTime;
 import com.outofthecave.libralarm.model.NotificationType;
+import com.outofthecave.libralarm.model.SnoozedAlarm;
+import com.outofthecave.libralarm.room.AlarmData;
 import com.outofthecave.libralarm.room.AppDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import needle.Needle;
 import needle.UiRelatedTask;
@@ -45,17 +48,21 @@ public class AlarmNotifier extends BroadcastReceiver {
             showNotification(context, alarms);
         } else {
             final AppDatabase database = AppDatabase.getInstance(context);
-            Needle.onBackgroundThread().execute(new UiRelatedTask<List<Alarm>>() {
+            Needle.onBackgroundThread().execute(new UiRelatedTask<AlarmData>() {
                 @Override
-                protected List<Alarm> doWork() {
-                    return database.alarmDao().getAll();
+                protected AlarmData doWork() {
+                    AlarmData alarmData = new AlarmData();
+                    alarmData.alarms = database.alarmDao().getAll();
+                    alarmData.snoozedAlarms = database.snoozedAlarmDao().getAll();
+                    return alarmData;
                 }
 
                 @Override
-                protected void thenDoUiRelatedWork(@NonNull List<Alarm> allAlarms) {
-                    Log.d("AlarmNotifier", "Retrieved " + allAlarms.size() + " alarm(s).");
+                protected void thenDoUiRelatedWork(@NonNull AlarmData alarmData) {
+                    Log.d("AlarmNotifier", "Retrieved " + alarmData.alarms.size() + " alarm(s).");
 
-                    ArrayList<Alarm> alarms = AlarmListFilter.getAlarmsToNotifyAboutNow(allAlarms);
+                    Map<Integer, SnoozedAlarm> idToSnoozedAlarm = AlarmListFilter.toSnoozedAlarmMap(alarmData.snoozedAlarms);
+                    ArrayList<Alarm> alarms = AlarmListFilter.getAlarmsToNotifyAboutNow(alarmData.alarms, idToSnoozedAlarm);
                     showNotification(context, alarms);
                 }
             });
@@ -100,7 +107,6 @@ public class AlarmNotifier extends BroadcastReceiver {
                 Intent fullscreenIntent = new Intent(context, FullscreenAlarmActivity.class);
                 fullscreenIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                fullscreenIntent.putParcelableArrayListExtra(FullscreenAlarmActivity.EXTRA_ALARMS_FOR_FULLSCREEN, alarms);
                 PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, fullscreenIntent, 0);
                 notificationBuilder.setFullScreenIntent(pendingIntent, true);
             } else {

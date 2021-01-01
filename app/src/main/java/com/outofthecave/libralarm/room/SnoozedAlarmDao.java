@@ -17,11 +17,8 @@ public interface SnoozedAlarmDao {
     List<SnoozedAlarm> getAll();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void upsert(SnoozedAlarm alarm);
+    void upsert(List<SnoozedAlarm> snoozedAlarms);
 
     @Delete(entity = SnoozedAlarm.class)
-    void deleteByKey(AlarmKey key);
-
-    @Update(onConflict = OnConflictStrategy.IGNORE)
-    void updateSnoozedAlarms(List<SnoozedAlarm> alarms);
+    void deleteByKey(List<AlarmKey> keys);
 }
