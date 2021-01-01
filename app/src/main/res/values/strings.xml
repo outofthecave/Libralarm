@@ -24,6 +24,10 @@
     <string name="notification_type_fullscreen">Fullscreen takeover</string>
     <string name="notification_type_heads_up">Notification on top of whatever is on the screen</string>
     <string name="notification_type_notification">Plain notification</string>
+    <string name="snooze_max_label">Max. times the alarm can be snoozed:</string>
+    <string name="snooze_max_unlimited_label">Allow unlimited snoozing</string>
+    <string name="snooze_interval_label">Snooze interval:</string>
+    <string name="snooze_interval_unit">minutes</string>
     <string name="save_alarm">Save</string>
     <string name="cancel_saving_alarm">Cancel saving</string>
     <string name="delete_alarm">Delete</string>

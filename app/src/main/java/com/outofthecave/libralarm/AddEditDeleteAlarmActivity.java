@@ -11,8 +11,10 @@ import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.NumberPicker;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
@@ -24,6 +26,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.ContextCompat;
 
 import com.outofthecave.libralarm.model.Alarm;
@@ -34,6 +37,7 @@ public class AddEditDeleteAlarmActivity extends AppCompatActivity {
     public static final int REQUEST_CODE = 1;
 
     public static final String FULLSCREEN_PERMISSION;
+
     static {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
             FULLSCREEN_PERMISSION = Manifest.permission.USE_FULL_SCREEN_INTENT;
@@ -66,6 +70,23 @@ public class AddEditDeleteAlarmActivity extends AppCompatActivity {
 
         TimePicker timePicker = findViewById(R.id.timePicker);
         timePicker.setIs24HourView(true);
+
+        NumberPicker snoozeMax = findViewById(R.id.snoozeMax);
+        snoozeMax.setMinValue(0);
+        snoozeMax.setMaxValue(99);
+
+        SwitchCompat snoozeMaxUnlimited = findViewById(R.id.snoozeMaxUnlimited);
+        snoozeMaxUnlimited.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                NumberPicker snoozeMax = findViewById(R.id.snoozeMax);
+                snoozeMax.setEnabled(!isChecked);
+            }
+        });
+
+        NumberPicker snoozeInterval = findViewById(R.id.snoozeInterval);
+        snoozeInterval.setMinValue(1);
+        snoozeInterval.setMaxValue(60);
 
         if (alarmBeingEdited != null) {
             EditText nameTextField = findViewById(R.id.nameTextField);
@@ -100,6 +121,15 @@ public class AddEditDeleteAlarmActivity extends AppCompatActivity {
                     notificationTypeNotification.toggle();
                 }
             }
+
+            if (alarmBeingEdited.snooze.maximum >= 0) {
+                snoozeMax.setValue(alarmBeingEdited.snooze.maximum);
+            } else {
+                snoozeMax.setEnabled(false);
+                snoozeMaxUnlimited.setChecked(true);
+            }
+
+            snoozeInterval.setValue(alarmBeingEdited.snooze.intervalMinutes);
 
         } else {
             // We're not editing an existing alarm, but creating a new one.
@@ -166,6 +196,17 @@ public class AddEditDeleteAlarmActivity extends AppCompatActivity {
             remindUserToSelectNotificationType();
             return;
         }
+
+        SwitchCompat snoozeMaxUnlimited = findViewById(R.id.snoozeMaxUnlimited);
+        if (snoozeMaxUnlimited.isChecked()) {
+            alarmBeingEdited.snooze.maximum = -1;
+        } else {
+            NumberPicker snoozeMax = findViewById(R.id.snoozeMax);
+            alarmBeingEdited.snooze.maximum = snoozeMax.getValue();
+        }
+
+        NumberPicker snoozeInterval = findViewById(R.id.snoozeInterval);
+        alarmBeingEdited.snooze.intervalMinutes = snoozeInterval.getValue();
 
         intent.putExtra(AlarmListActivity.EXTRA_ALARM_TO_UPSERT, alarmBeingEdited);
         finishWithResult(intent);
