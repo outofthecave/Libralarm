@@ -4,7 +4,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.outofthecave.libralarm.model.Alarm;
-import com.outofthecave.libralarm.model.AlarmNotification;
 import com.outofthecave.libralarm.model.DateTime;
 import com.outofthecave.libralarm.model.SnoozedAlarm;
 
@@ -28,38 +27,30 @@ public class AlarmListFilter {
         return idToSnoozedAlarm;
     }
 
-    public static AlarmNotification getAlarmsComingUpNow(List<Alarm> allAlarms, Map<Integer, SnoozedAlarm> idToSnoozedAlarm, DateTime lastTriggered) {
+    @Nullable
+    public static DateTime getNextNotificationDateTimeAfterNow(List<Alarm> allAlarms, Map<Integer, SnoozedAlarm> idToSnoozedAlarm, DateTime lastTriggered) {
         DateTime now = DateTime.now();
-        return getAlarmsComingUpAtDateTime(allAlarms, idToSnoozedAlarm, lastTriggered, now);
+        return getNextNotificationDateTimeAfterDateTime(allAlarms, idToSnoozedAlarm, lastTriggered, now);
     }
 
+    @Nullable
     @VisibleForTesting
-    static AlarmNotification getAlarmsComingUpAtDateTime(List<Alarm> allAlarms, Map<Integer, SnoozedAlarm> idToSnoozedAlarm, DateTime lastTriggered, DateTime referenceDateTime) {
-        AlarmNotification notification = new AlarmNotification();
+    static DateTime getNextNotificationDateTimeAfterDateTime(List<Alarm> allAlarms, Map<Integer, SnoozedAlarm> idToSnoozedAlarm, DateTime lastTriggered, DateTime referenceDateTime) {
+        DateTime notificationDateTime = null;
         for (Alarm alarm : allAlarms) {
             if (alarm.enabled) {
                 SnoozedAlarm snoozedAlarm = idToSnoozedAlarm.get(alarm.id);
                 DateTime alarmNotifDateTime = getNextNotificationDateTime(alarm, snoozedAlarm);
                 if (referenceDateTime.compareTo(alarmNotifDateTime) <= 0
-                        && lastTriggered.compareTo(alarmNotifDateTime) < 0) {
-                    if (notification.alarms.isEmpty()) {
-                        notification.alarms.add(alarm);
-                        notification.dateTime = alarmNotifDateTime;
-                    } else {
-                        int cmp = alarmNotifDateTime.compareTo(notification.dateTime);
-                        if (cmp < 0) {
-                            notification.alarms = new ArrayList<>(1);
-                            notification.alarms.add(alarm);
-                            notification.dateTime = alarmNotifDateTime;
-                        } else if (cmp == 0) {
-                            notification.alarms.add(alarm);
-                        }
-                    }
+                        && lastTriggered.compareTo(alarmNotifDateTime) < 0
+                        && (notificationDateTime == null
+                        || alarmNotifDateTime.compareTo(notificationDateTime) < 0)) {
+                    notificationDateTime = alarmNotifDateTime;
                 }
             }
         }
 
-        return notification;
+        return notificationDateTime;
     }
 
     @VisibleForTesting
@@ -91,8 +82,7 @@ public class AlarmListFilter {
         return getAlarmsToNotifyAboutAtDateTime(allAlarms, idToSnoozedAlarm, now);
     }
 
-    @VisibleForTesting
-    static ArrayList<Alarm> getAlarmsToNotifyAboutAtDateTime(List<Alarm> allAlarms, Map<Integer, SnoozedAlarm> idToSnoozedAlarm, DateTime referenceDateTime) {
+    public static ArrayList<Alarm> getAlarmsToNotifyAboutAtDateTime(List<Alarm> allAlarms, Map<Integer, SnoozedAlarm> idToSnoozedAlarm, DateTime referenceDateTime) {
         ArrayList<Alarm> alarms = new ArrayList<>();
         long referenceEpochMillis = referenceDateTime.toEpochMillis();
         long minDiffMillis = Long.MAX_VALUE;

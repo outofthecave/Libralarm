@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.outofthecave.libralarm.logic.AlarmListFilter;
 import com.outofthecave.libralarm.logic.AlarmNameFormatter;
+import com.outofthecave.libralarm.logic.TriggeringAlarmActionHandler;
 import com.outofthecave.libralarm.model.Alarm;
 import com.outofthecave.libralarm.model.SnoozedAlarm;
 import com.outofthecave.libralarm.room.AlarmData;
@@ -119,25 +120,7 @@ public class FullscreenAlarmActivity extends AppCompatActivity {
         Log.d("FullscreenAlarmActivity", "onSnoozeAlarmButtonClick");
 
         if (alarms != null && idToSnoozedAlarm != null) {
-            final List<SnoozedAlarm> snoozedAlarms = new ArrayList<>(alarms.size());
-            for (Alarm alarm : alarms) {
-                SnoozedAlarm snoozedAlarm = idToSnoozedAlarm.get(alarm.id);
-                if (AlarmListFilter.isSnoozingPossible(alarm, snoozedAlarm)) {
-                    if (snoozedAlarm == null) {
-                        snoozedAlarm = new SnoozedAlarm(alarm.id);
-                    }
-                    snoozedAlarm.snoozeCount += 1;
-                    snoozedAlarms.add(snoozedAlarm);
-                }
-            }
-
-            final AppDatabase database = AppDatabase.getInstance(this);
-            Needle.onBackgroundThread().execute(new Runnable() {
-                @Override
-                public void run() {
-                    database.snoozedAlarmDao().upsert(snoozedAlarms);
-                }
-            });
+            TriggeringAlarmActionHandler.snoozeAlarms(this, alarms, idToSnoozedAlarm);
         }
 
         finish();
@@ -147,20 +130,7 @@ public class FullscreenAlarmActivity extends AppCompatActivity {
         Log.d("FullscreenAlarmActivity", "onCancelAlarmButtonClick");
 
         if (alarms != null) {
-            List<AlarmKey> snoozedAlarmsToDelete = new ArrayList<>(alarms.size());
-            for (Alarm alarm : alarms) {
-                AlarmKey key = new AlarmKey();
-                key.id = alarm.id;
-                snoozedAlarmsToDelete.add(key);
-            }
-
-            final AppDatabase database = AppDatabase.getInstance(this);
-            Needle.onBackgroundThread().execute(new Runnable() {
-                @Override
-                public void run() {
-                    database.snoozedAlarmDao().deleteByKey(snoozedAlarmsToDelete);
-                }
-            });
+            TriggeringAlarmActionHandler.cancelAlarms(this, alarms);
         }
 
         finish();

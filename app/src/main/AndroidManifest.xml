@@ -49,6 +49,14 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".logic.AlarmSnoozer"
+            android:exported="false" />
+
+        <receiver
+            android:name=".logic.AlarmCanceler"
+            android:exported="false" />
+
     </application>
 
 </manifest>

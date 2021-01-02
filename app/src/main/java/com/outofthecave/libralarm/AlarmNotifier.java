@@ -16,8 +16,10 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
+import com.outofthecave.libralarm.logic.AlarmCanceler;
 import com.outofthecave.libralarm.logic.AlarmListFilter;
 import com.outofthecave.libralarm.logic.AlarmNameFormatter;
+import com.outofthecave.libralarm.logic.AlarmSnoozer;
 import com.outofthecave.libralarm.model.Alarm;
 import com.outofthecave.libralarm.model.DateTime;
 import com.outofthecave.libralarm.model.NotificationType;
@@ -37,39 +39,32 @@ public class AlarmNotifier extends BroadcastReceiver {
     private static final String HEADS_UP_NOTIFICATION_CHANNEL_ID = "alarm_heads_up";
     private static final String PLAIN_NOTIFICATION_CHANNEL_ID = "alarm_notification";
 
-    public static final String EXTRA_ALARMS = "com.outofthecave.libralarm.EXTRA_ALARMS";
-
     @Override
     public void onReceive(final Context context, Intent intent) {
-        ArrayList<Alarm> alarms = intent.getParcelableArrayListExtra(EXTRA_ALARMS);
-        Log.d("AlarmNotifier", "Triggered a scheduled notification for " + (alarms == null ? null : alarms.size()) + " alarm(s).");
+        Log.d("AlarmNotifier", "Triggered a scheduled notification");
 
-        if (alarms != null) {
-            showNotification(context, alarms);
-        } else {
-            final AppDatabase database = AppDatabase.getInstance(context);
-            Needle.onBackgroundThread().execute(new UiRelatedTask<AlarmData>() {
-                @Override
-                protected AlarmData doWork() {
-                    AlarmData alarmData = new AlarmData();
-                    alarmData.alarms = database.alarmDao().getAll();
-                    alarmData.snoozedAlarms = database.snoozedAlarmDao().getAll();
-                    return alarmData;
-                }
+        final AppDatabase database = AppDatabase.getInstance(context);
+        Needle.onBackgroundThread().execute(new UiRelatedTask<AlarmData>() {
+            @Override
+            protected AlarmData doWork() {
+                AlarmData alarmData = new AlarmData();
+                alarmData.alarms = database.alarmDao().getAll();
+                alarmData.snoozedAlarms = database.snoozedAlarmDao().getAll();
+                return alarmData;
+            }
 
-                @Override
-                protected void thenDoUiRelatedWork(@NonNull AlarmData alarmData) {
-                    Log.d("AlarmNotifier", "Retrieved " + alarmData.alarms.size() + " alarm(s).");
+            @Override
+            protected void thenDoUiRelatedWork(@NonNull AlarmData alarmData) {
+                Log.d("AlarmNotifier", "Retrieved " + alarmData.alarms.size() + " alarm(s).");
 
-                    Map<Integer, SnoozedAlarm> idToSnoozedAlarm = AlarmListFilter.toSnoozedAlarmMap(alarmData.snoozedAlarms);
-                    ArrayList<Alarm> alarms = AlarmListFilter.getAlarmsToNotifyAboutNow(alarmData.alarms, idToSnoozedAlarm);
-                    showNotification(context, alarms);
-                }
-            });
-        }
+                Map<Integer, SnoozedAlarm> idToSnoozedAlarm = AlarmListFilter.toSnoozedAlarmMap(alarmData.snoozedAlarms);
+                ArrayList<Alarm> alarms = AlarmListFilter.getAlarmsToNotifyAboutNow(alarmData.alarms, idToSnoozedAlarm);
+                showNotification(context, alarms, idToSnoozedAlarm);
+            }
+        });
     }
 
-    private void showNotification(Context context, @NonNull ArrayList<Alarm> alarms) {
+    private void showNotification(Context context, @NonNull ArrayList<Alarm> alarms, Map<Integer, SnoozedAlarm> idToSnoozedAlarm) {
         Log.d("AlarmNotifier", "Supposed to show a notification for " + alarms.size() + " alarm(s).");
         if (!alarms.isEmpty()) {
             String text = AlarmNameFormatter.joinAlarmNamesOnNewline(alarms);
@@ -109,16 +104,32 @@ public class AlarmNotifier extends BroadcastReceiver {
                         | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, fullscreenIntent, 0);
                 notificationBuilder.setFullScreenIntent(pendingIntent, true);
+
             } else {
                 Intent notificationTapIntent = new Intent(context, AlarmListActivity.class);
                 PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationTapIntent, 0);
                 notificationBuilder.setContentIntent(pendingIntent);
+
+                if (AlarmListFilter.isSnoozingPossibleForAny(alarms, idToSnoozedAlarm)) {
+                    Intent snoozeIntent = new Intent(context, AlarmSnoozer.class);
+                    PendingIntent snoozePendingIntent = PendingIntent.getActivity(context, 0, snoozeIntent, 0);
+                    notificationBuilder.addAction(R.drawable.ic_baseline_snooze_24,
+                            context.getString(R.string.notification_action_snooze_alarm),
+                            snoozePendingIntent);
+                }
+
+                Intent cancelIntent = new Intent(context, AlarmCanceler.class);
+                PendingIntent cancelPendingIntent = PendingIntent.getActivity(context, 0, cancelIntent, 0);
+                notificationBuilder.addAction(R.drawable.ic_baseline_alarm_off_24,
+                        context.getString(R.string.notification_action_cancel_alarm),
+                        cancelPendingIntent);
             }
 
             notificationBuilder.setSmallIcon(R.drawable.ic_baseline_alarm_24)
                     .setContentText(text)
                     .setStyle(new NotificationCompat.BigTextStyle()
                             .bigText(text))
+                    .setAllowSystemGeneratedContextualActions(false)
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                     .setCategory(NotificationCompat.CATEGORY_ALARM);
 

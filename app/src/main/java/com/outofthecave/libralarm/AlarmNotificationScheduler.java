@@ -9,17 +9,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
-
 import com.outofthecave.libralarm.logic.AlarmListFilter;
 import com.outofthecave.libralarm.model.Alarm;
-import com.outofthecave.libralarm.model.AlarmNotification;
 import com.outofthecave.libralarm.model.DateTime;
 import com.outofthecave.libralarm.model.SnoozedAlarm;
 import com.outofthecave.libralarm.room.AlarmData;
 import com.outofthecave.libralarm.room.AppDatabase;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -30,10 +26,18 @@ public class AlarmNotificationScheduler extends BroadcastReceiver {
     /**
      * The time at which the last notification was shown to the user.
      */
-    private static DateTime lastTriggered = new DateTime();
+    private static final DateTime[] lastTriggered = new DateTime[] { new DateTime() };
+
+    public static DateTime getLastTriggered() {
+        synchronized (lastTriggered) {
+            return AlarmNotificationScheduler.lastTriggered[0];
+        }
+    }
 
     public static void setLastTriggered(DateTime lastTriggered) {
-        AlarmNotificationScheduler.lastTriggered = lastTriggered;
+        synchronized (AlarmNotificationScheduler.lastTriggered) {
+            AlarmNotificationScheduler.lastTriggered[0] = lastTriggered;
+        }
     }
 
     @Override
@@ -56,10 +60,14 @@ public class AlarmNotificationScheduler extends BroadcastReceiver {
 
             @Override
             protected void thenDoUiRelatedWork(AlarmData alarmData) {
-                Map<Integer, SnoozedAlarm> idToSnoozedAlarm = AlarmListFilter.toSnoozedAlarmMap(alarmData.snoozedAlarms);
-                scheduleNextNotification(context, alarmData.alarms, idToSnoozedAlarm);
+                scheduleNextNotification(context, alarmData);
             }
         });
+    }
+
+    public static void scheduleNextNotification(Context context, AlarmData alarmData) {
+        Map<Integer, SnoozedAlarm> idToSnoozedAlarm = AlarmListFilter.toSnoozedAlarmMap(alarmData.snoozedAlarms);
+        scheduleNextNotification(context, alarmData.alarms, idToSnoozedAlarm);
     }
 
     public static void scheduleNextNotification(Context context, List<Alarm> alarms, Map<Integer, SnoozedAlarm> idToSnoozedAlarm) {
@@ -67,11 +75,11 @@ public class AlarmNotificationScheduler extends BroadcastReceiver {
             // Android only allows us to set one trigger for the AlarmNotifier, so we only schedule
             // a notification for the closest upcoming alarms (in case there are multiple alarms at
             // the same time).
-            AlarmNotification notification = AlarmListFilter.getAlarmsComingUpNow(alarms, idToSnoozedAlarm, lastTriggered);
+            DateTime notificationDateTime = AlarmListFilter.getNextNotificationDateTimeAfterNow(alarms, idToSnoozedAlarm, lastTriggered[0]);
 
-            if (!notification.alarms.isEmpty()) {
-                long triggerTimestamp = notification.dateTime.toEpochMillis();
-                scheduleNotification(context, triggerTimestamp, notification.alarms);
+            if (notificationDateTime != null) {
+                long triggerTimestamp = notificationDateTime.toEpochMillis();
+                scheduleNotification(context, triggerTimestamp);
                 setAutoSchedulingOnReboot(context, true);
                 return;
             }
@@ -113,17 +121,13 @@ public class AlarmNotificationScheduler extends BroadcastReceiver {
      *
      * @param context             The current context.
      * @param triggerTimestamp    When to trigger the notification, in milliseconds since the Unix Epoch.
-     * @param alarmsToNotifyAbout The alarms to mention in the notification.
      */
-    public static void scheduleNotification(Context context, long triggerTimestamp, @Nullable ArrayList<Alarm> alarmsToNotifyAbout) {
+    public static void scheduleNotification(Context context, long triggerTimestamp) {
         Log.d("AlarmNotifScheduler", "Scheduling an alarm notification for epoch time: " + triggerTimestamp);
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent notifierIntent = new Intent(context, AlarmNotifier.class);
-
-        notifierIntent.putParcelableArrayListExtra(AlarmNotifier.EXTRA_ALARMS, alarmsToNotifyAbout);
         PendingIntent pendingNotifierIntent = getPendingNotifierIntent(context, notifierIntent);
-
         alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTimestamp, pendingNotifierIntent);
     }
 }
