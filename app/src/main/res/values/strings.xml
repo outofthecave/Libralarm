@@ -40,6 +40,8 @@
     <string name="fullscreen_snooze_alarm">Snooze</string>
     <string name="fullscreen_cancel_alarm">Cancel</string>
 
+    <string name="alarm_name_suffix_snoozed_once">\u0020(snoozed once)</string>
+    <string name="alarm_name_suffix_snoozed_multiple_times">\u0020(snoozed %1$d times)</string>
     <string name="notification_action_snooze_alarm">Snooze</string>
     <string name="notification_action_cancel_alarm">Cancel</string>
 </resources>

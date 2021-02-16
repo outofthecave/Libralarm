@@ -104,7 +104,7 @@ public class FullscreenAlarmActivity extends AppCompatActivity {
         this.alarms = alarms;
         this.idToSnoozedAlarm = idToSnoozedAlarm;
 
-        String text = AlarmNameFormatter.joinAlarmNamesOnNewline(alarms);
+        String text = AlarmNameFormatter.joinAlarmNamesOnNewline(this, alarms, idToSnoozedAlarm);
         TextView alarmName = findViewById(R.id.alarmName);
         if (!text.isEmpty()) {
             alarmName.setText(text);

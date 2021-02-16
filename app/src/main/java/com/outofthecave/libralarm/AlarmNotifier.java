@@ -67,7 +67,7 @@ public class AlarmNotifier extends BroadcastReceiver {
     private void showNotification(Context context, @NonNull ArrayList<Alarm> alarms, Map<Integer, SnoozedAlarm> idToSnoozedAlarm) {
         Log.d("AlarmNotifier", "Supposed to show a notification for " + alarms.size() + " alarm(s).");
         if (!alarms.isEmpty()) {
-            String text = AlarmNameFormatter.joinAlarmNamesOnNewline(alarms);
+            String text = AlarmNameFormatter.joinAlarmNamesOnNewline(context, alarms, idToSnoozedAlarm);
 
             NotificationType notificationType = NotificationType.NOTIFICATION;
             for (Alarm alarm : alarms) {
