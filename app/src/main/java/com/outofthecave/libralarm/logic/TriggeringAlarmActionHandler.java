@@ -25,6 +25,7 @@ public class TriggeringAlarmActionHandler {
 
     public static void snoozeAlarms(final Context context, List<Alarm> alarmsToSnooze, Map<Integer, SnoozedAlarm> idToSnoozedAlarm) {
         final List<SnoozedAlarm> snoozedAlarms = new ArrayList<>(alarmsToSnooze.size());
+        final List<AlarmKey> snoozedAlarmsToDelete = new ArrayList<>();
         for (Alarm alarm : alarmsToSnooze) {
             SnoozedAlarm snoozedAlarm = idToSnoozedAlarm.get(alarm.id);
             if (AlarmListFilter.isSnoozingPossible(alarm, snoozedAlarm)) {
@@ -33,6 +34,10 @@ public class TriggeringAlarmActionHandler {
                 }
                 snoozedAlarm.snoozeCount += 1;
                 snoozedAlarms.add(snoozedAlarm);
+            } else {
+                AlarmKey key = new AlarmKey();
+                key.id = alarm.id;
+                snoozedAlarmsToDelete.add(key);
             }
         }
 
@@ -41,6 +46,7 @@ public class TriggeringAlarmActionHandler {
             @Override
             protected AlarmData doWork() {
                 database.snoozedAlarmDao().upsert(snoozedAlarms);
+                database.snoozedAlarmDao().deleteByKey(snoozedAlarmsToDelete);
 
                 AlarmData alarmData = new AlarmData();
                 alarmData.alarms = database.alarmDao().getAll();
