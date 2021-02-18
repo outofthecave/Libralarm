@@ -19,6 +19,10 @@ public final class SnoozedAlarm implements Parcelable {
     /**
      * Number of times the alarm has been snoozed already.
      */
+    // TODO Move this field to the Alarm class and delete the SnoozedAlarm class. We don't want to
+    // rely on the presence/absence of an entry in a database to track the state of alarms because
+    // we can't guarantee that they'll be deleted at the right time. Instead, we should also add a
+    // field to Alarm to keep track of the last timestamp when the alarm triggered.
     public int snoozeCount = 0;
 
     /**
